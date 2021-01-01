@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+   <path id="diffuseLightingMain" fill="none" stroke="black" stroke-width="1" d="M 23.00,1.18
+           C 12.18,0.73 -4.36,40.09 1.91,46.55
+             8.18,53.00 44.45,48.18 48.73,44.36
+             53.00,40.55 33.82,1.64 23.00,1.18 Z" />
+   <path id="diffuseLightingSocket" fill="none" stroke="black" stroke-width="1" d="M 12.25,15.31
+           C 15.75,14.44 19.62,20.00 19.00,22.81
+             18.38,25.62 11.81,28.19 8.00,25.06
+             4.19,21.94 8.75,16.19 12.25,15.31 Z" />
+   <path id="diffuseLightingColor" fill="none" stroke="black" stroke-width="1" d="M 26.38,15.25
+           C 28.00,13.88 34.88,13.88 36.38,15.00
+             37.88,16.12 37.88,27.44 36.12,29.25
+             34.38,31.06 28.06,30.12 26.69,28.62
+             25.31,27.12 24.75,16.62 26.38,15.25 Z" />
+   <path id="diffuseLightingScale" fill="none" stroke="black" stroke-width="1" d="M 25.38,32.56
+           C 25.38,32.56 29.31,32.62 29.31,32.62
+             29.31,32.62 29.06,37.31 29.06,37.31
+             29.06,37.31 25.19,37.62 25.19,37.62
+             25.19,37.62 25.38,32.56 25.38,32.56 Z" />
+   <path id="diffuseLightingConstant" fill="none" stroke="black" stroke-width="1" d="M 8.88,42.50
+           C 8.88,42.50 8.50,46.25 8.69,46.31
+             8.88,46.38 13.75,46.25 13.75,46.25
+             13.75,46.25 14.19,42.31 14.12,42.31
+             14.06,42.31 8.88,42.50 8.88,42.50 Z" />
+</svg>

@@ -1,0 +1,48 @@
+<html lang="en">
+<link>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>feDeadBoard</title>
+    <link rel="stylesheet" href="css/feDeadBoardPalette.css"/>
+    <link rel="stylesheet" href="css/feDeadBoard.css"/>
+</head>
+<body>
+    <div>
+        <svg id="svgCanvas" preserve-aspect-ratio="xMaxYMid meet" width="40%" height="100%"></svg>
+    </div>
+    <!-- end of svgContainer -->
+    <svg id="grid" xmlns="http://www.w3.org/2000/svg" width="75%" height="100%" viewBox="0, 0, 800, 600" preserveAspectRatio="xMinYMid meet">
+        <defs id="gridDefs">
+            <defs id="filterDefs">
+                <filter id="filterSkull" x="-100%" y="-100%" width="300%" height="300%">
+                    <feOffset in="SourceGraphic" dx="0" />
+                </filter>
+                <filter id="filterJaw"  x="-100%" y="-100%" width="300%" height="300%">
+                    <feOffset in="SourceGraphic" dx="0" />
+                </filter>
+            </defs>
+            <g id="controllerContainer">
+                <g id="controllerMorphologyContainer"></g>
+                <!-- gaussian blur -->
+                <g id="controllerDisplacementMapContainer"></g>
+                <g id="controllerTurbulenceContainer"></g>
+                <g id="controllerSpecularLightingContainer"></g>
+                <g id="controllerDiffuseLightingContainer"></g>
+
+                <g id="compositeOperatorContainer"></g>
+                <g id="bulbsContainer"></g>
+            </g>
+        </defs>
+        <g id="gridRects"></g>
+        <g id="connectorLayer"></g>
+    </svg>
+   
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/gsap-shockingly-green/umd/gsap.js"></script>
+    <script type="text/javascript" src="js/gsap-shockingly-green/umd/Draggable.js"></script>
+    <script type="text/javascript" src="js/gsap-shockingly-green/umd/InertiaPlugin.js"></script>
+    <script type="text/javascript" src="js/gsap-shockingly-green/umd/MorphSVGPlugin.js"></script>
+    <script type="text/javascript" src="js/svgGeneric.js"></script>
+    <script type="text/javascript" src="js/feControllers.js"></script>
+</body>
+</html>

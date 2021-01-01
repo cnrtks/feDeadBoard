@@ -1,0 +1,34 @@
+ really inconsitent use of jquery and vanilla js try to determine where and when to use what
+ cleaan up query selectors (consistent passing of elements vs classes into drag and such)
+the drag functions need to be simplified and unified and something
+lower default inrertia velocity
+standardize attrKnobs and relevant functions
+keyword super and this are inconsitently used for parent functions
+class/id inconsistency in source svgs
+colorize lighting elements and color selector
+
+overlapping elements hit test fix it
+
+spot light functionlity
+poit light xyz controls
+k1k2k3k4 for the arithmetic composite operator
+blend controller needs some visual indication that mode is changeing
+colorMatrix needs some visual indication that type is changing
+
+nextMode/nextOperator/change operator can all be simplified into one function? maybe
+
+move filter defs to canvas OR move everything to one svg and have grid squares overlaping with skull invalid for controllers
+fix dropintoSocket and move into FilterElementClass
+
+default values for everything need to be set including default colors for color picker inputs
+theres some values initialized in createController of some class(es) move them to initVars function
+
+change all string manipulation to string interpolation rather than string concat
+
+
+ the filters
+
+NOIN            <li id="liMerge" class="liFe">Merge</li>
+in mergeNode
+in            <li id="liConvolutionMatrix" class="liFe">Convolve</li>
+in                        <li id="liTile" class="liFe">Tile</li>???????????????????????????

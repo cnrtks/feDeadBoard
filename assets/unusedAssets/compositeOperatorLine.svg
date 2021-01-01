@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+
+<circle r="12" cx="25" cy="25"/>
+<line x1="13" x2="19" y1="25" y2="25" />
+<line x1="37" x2="31" y1="25" y2="25" />
+<line x1="25" x2="25" y1="13" y2="19" />
+<line x1="25" x2="25" y1="37" y2="31" />
+
+<polyline points="17,23 19,25 17,27"/>
+<polyline points="33,23 31,25 33,27"/>
+<polyline points="23,17 25,19 27,17"/>
+<polyline points="23,33 25,31 27,33"/>
+
+<line x1="13" x2="7" y1="25" y2="25" />
+<line x1="37" x2="43" y1="25" y2="25" />
+<line x1="25" x2="25" y1="13" y2="7" />
+<line x1="25" x2="25" y1="37" y2="43" />
+
+<polyline points="9,23 7,25 9,27"/>
+<polyline points="41,23 43,25 41,27"/>
+<polyline points="23,9 25,7 27,9"/>
+<polyline points="23,41 25,43 27,41"/>
+
+<line x1="13" y1="25" x2="37" y2="25"/>
+<line x1="25" y1="13" x2="25" y2="37"/>
+
+<line x1="19" y1="25" x2="31" y2="25"/>
+<line x1="25" y1="19" x2="25" y2="31"/>
+
+<line x1="7" y1="25" x2="43" y2="25"/>
+<line x1="25" y1="7" x2="25" y2="43"/>
+
+<line x1="13" y1="25" x2="37" y2="25"/>
+<line x1="21" y1="21" x2="29" y2="29"/>
+<line x1="21" y1="29" x2="29" y2="21"/>
+<circle r="1.5" cx="25" cy="17"/>
+<circle r="1.5" cx="25" cy="33"/> 
+
+</svg>
