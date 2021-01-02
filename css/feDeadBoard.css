@@ -1,53 +1,36 @@
+html {
+    background-color: black;
+}
+
+body {
+    --green: #91e600;
+    --R    : red;
+    --G    : green;
+    --B    : blue;
+    --A    : white;
+}
+
 svg {
     overflow: visible;
 }
 
-#grid {
-    overflow: visible;
-    padding : 0;
-    position: fixed;
-    left    : 0;
-    top     : 0;
+.wire {
+    stroke-width    : 2;
+    stroke          : #7DF9FF;
+    stroke-dasharray: 5 10;
+    fill            : none;
+    stroke-linecap  : round;
 }
 
-/* .controller {
-    fill       : #91e600;
-    text-align : center;
-    font-family: Asap, Avenir, Arial, sans-serif;
-    width      : 50px;
-    height     : 50px;
-    line-height: 100px;
-    color      : black;
-    position   : absolute;
-    top        : 0;
-    rx         : 10px;
-    ry         : 10px;
-} */
-
-#svgCanvas {
-    position        : fixed;
-    right           : -5%;
-    /* width        : 50%;
-    height          : 100%; */
+#deadBoard {
     background-color: black;
 }
 
-#feUiTray {
-    position        : fixed;
-    left            : 0;
-    width           : 15%;
-    height          : 100%;
-    background-color: aqua;
-}
-
 #skull {
-    fill  : teal;
-    filter: url("#filterSkull");
+    fill: teal;
 }
 
-#jaw {
-    filter: url("#filterJaw");
-}
+#jaw {}
 
 .eye {
     fill: greenyellow;
@@ -99,11 +82,11 @@ svg {
 
 /* turbulence */
 .turbulenceMain {
-    fill: pink;
+    fill: gray;
 }
 
 .turbulenceTypeSwitch {
-    fill: gray;
+    fill: black;
 }
 
 .baseFrequencyTab {
@@ -228,21 +211,56 @@ input {
     stroke: black
 } */
 
-.funcButton{
-    fill:red;
-    stroke: black;
+.funcButton {
+    fill        : red;
+    stroke      : black;
     stroke-width: 0.5;
 }
 
-.socket{
-    rx: 5;
-    ry: 5;
-    fill: lightblue;
-    stroke: gold;
-    stroke-width: 2;
-    stroke-dasharray: 3; 
+.socket {
+    rx              : 5;
+    ry              : 5;
+    fill            : lightblue;
+    stroke          : gold;
+    stroke-width    : 2;
+    stroke-dasharray: 3;
 }
 
-#svgSkull{
+#svgSkull {
     filter: url(#filter0);
+}
+
+.channelIndicator:not(.activeChannel) {
+    fill: black;
+}
+
+.switch {
+    fill: red;
+}
+
+.fixture {
+    fill: slategray;
+}
+
+/* colorMatrix */
+.matrixPanel{
+    fill: darkgray
+}
+
+.panelRear{
+    fill:lightgray
+}
+
+/* blend */
+.blend{
+    fill: aliceblue;
+    stroke-dasharray: 6;
+stroke-width: 4;
+stroke: aliceblue;
+}
+
+.imageMain{
+    fill: yellow;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }

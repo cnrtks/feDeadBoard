@@ -40,9 +40,13 @@ circle = function (params) {
   return createSvgElement("circle", params);
 };
 
-line = function(params){
+line = function (params) {
   return createSvgElement("line", params);
-}
+};
+
+polyline = function (params) {
+  return createSvgElement("polyline", params);
+};
 
 //filter stuff
 //filterElement
@@ -62,6 +66,16 @@ line = function(params){
 //   });
 //   return filter;
 // };
+
+getCenterX = function (el) {
+  let bBox = el.getBoundingClientRect();
+  return (bBox.x + bBox.width) / 2;
+};
+
+getCenterY = function (el) {
+  let bBox = el.getBoundingClientRect();
+  return (bBox.y + bBox.height) / 2;
+};
 
 //centers an element around point 0,0
 //TODO: test this

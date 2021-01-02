@@ -1,4 +1,19 @@
  really inconsitent use of jquery and vanilla js try to determine where and when to use what
+    - document.getelemnt/class vs $(.)
+    - forEach vs .each
+    -gsap.set(kjask{attr}) vs $().attr("asdsa", "asdsa") vs .setAttributeNS
+
+
+fix connector line
+
+morphology is very laggy, truncate values????
+
+!!!
+nextEnum should be replace with a function that gets the indexOf the current blah blah
+you shoudl remove this.controllerspecificindex and rename the arrays,
+!!!
+
+
  cleaan up query selectors (consistent passing of elements vs classes into drag and such)
 the drag functions need to be simplified and unified and something
 lower default inrertia velocity
@@ -6,6 +21,7 @@ standardize attrKnobs and relevant functions
 keyword super and this are inconsitently used for parent functions
 class/id inconsistency in source svgs
 colorize lighting elements and color selector
+lse's need to anchor to the light socket
 
 overlapping elements hit test fix it
 
@@ -13,7 +29,7 @@ spot light functionlity
 poit light xyz controls
 k1k2k3k4 for the arithmetic composite operator
 blend controller needs some visual indication that mode is changeing
-colorMatrix needs some visual indication that type is changing
+colorMatrix/componentTransfer needs some visual indication that type is changing
 
 nextMode/nextOperator/change operator can all be simplified into one function? maybe
 
