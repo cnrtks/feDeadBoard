@@ -299,3 +299,16 @@ foreignObject {
 .imageRear {
     fill: var(--blue-dark);
 }
+
+.connector{
+    stroke: black;
+    stroke-width: 2;
+}
+
+.connector.male{
+    fill: skyblue;
+}
+
+.connector.female{
+    fill: thistle;
+}

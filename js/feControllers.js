@@ -25,6 +25,7 @@ let gridRows = 7,
   x,
   y;
 const grid = document.getElementById("deadBoard");
+const wireLayer = document.getElementById("wireLayer");
 const filterDefs = document.getElementById("filterDefs");
 
 //FIXME: should be in lib
@@ -1461,20 +1462,18 @@ class Connector extends Controller {
   }
 
   createController() {
-    this.maleClasses = this.controllerId + "Head male";
-    this.femaleClasses = this.controllerId + "Head female";
+    this.maleClasses = this.controllerId + "Head male connector";
+    this.femaleClasses = this.controllerId + "Head female connector";
     let g = group();
     g.appendChild(
-      circle({
+      path({
         id: this.controllerId + "Male",
         class: this.maleClasses,
         fill: "lightblue",
-        r: 20,
-        cx: 25,
-        cy: 25,
+        d: $("#connectorMale").attr("d"),
       })
     );
-    g.appendChild(
+    wireLayer.appendChild(
       polyline({
         id: this.controllerId + "Line",
         points: "25,25 25,25 25,25 25,25",
@@ -1484,13 +1483,11 @@ class Connector extends Controller {
       })
     );
     g.appendChild(
-      circle({
+      path({
         id: this.controllerId + "Female",
         class: this.femaleClasses,
         fill: "magenta",
-        r: 20,
-        cx: 25,
-        cy: 25,
+        d: $("#connectorFemale").attr("d"),
       })
     );
     return g;
@@ -1820,6 +1817,7 @@ importExternalSvg = function () {
     "/assets/controllers/controllerFlood.svg"
   );
 
+  $("#connectorContainer").load("/assets/controllers/connector.svg");
   $("#compositeOperatorContainer").load(
     "/assets/controllers/compositeOperatorPaths.svg"
   );
