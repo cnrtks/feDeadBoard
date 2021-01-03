@@ -3,15 +3,25 @@ html {
 }
 
 body {
-    --green: #91e600;
-    --R    : red;
-    --G    : green;
-    --B    : blue;
-    --A    : white;
+    --yellow    : #FABC2A;
+    --green-dark: #2A6041;
+    --blue-dark : #474973;
+    --R         : #ED6A5A;
+    --G         : #91e600;
+    --B         : #36C9C6;
+    --A         : #ffffff;
+}
+
+body {
+    display: flex;
 }
 
 svg {
     overflow: visible;
+}
+
+#dial {
+    fill: var(--blue-dark);
 }
 
 .wire {
@@ -33,7 +43,7 @@ svg {
 #jaw {}
 
 .eye {
-    fill: greenyellow;
+    fill: var(--G);
 }
 
 .nostril {
@@ -50,25 +60,25 @@ svg {
 
 .filterSocket {
     stroke-width: 2;
-    stroke      : green
+    stroke      : var(--green-dark)
 }
 
 /* controllers */
 /* morphology */
 /* gaussianBlur */
 .controllerGaussianBlurOuter {
-    fill: #91e600;
+    fill: white;
 }
 
 .controllerGaussianBlurMiddle {
     stroke-width: 1;
-    stroke      : black;
+    fill        : var(--B);
 }
 
 .controllerGaussianBlurInner {
     stroke-width: 1;
     stroke      : black;
-    fill        : #91e600;
+    fill        : black;
 }
 
 /* displacementMap */
@@ -90,11 +100,11 @@ svg {
 }
 
 .baseFrequencyTab {
-    fill: blue;
+    fill: var(--B);
 }
 
 .octaveTab {
-    fill: red;
+    fill: var(--R);
 }
 
 /* specularLighting */
@@ -129,7 +139,8 @@ svg {
 }
 
 .bulb {
-    fill: rgba(250, 65, 80, 0.5);
+    fill   : var(--R);
+    opacity: 0.5
 }
 
 .spotBulbMain {
@@ -149,7 +160,7 @@ svg {
 }
 
 .diffuseMain {
-    fill: lightgray;
+    fill: gray;
 }
 
 .composite circle {
@@ -171,45 +182,63 @@ svg {
 }
 
 foreignObject {
-    width  : 50px;
-    height : 25px;
-    z-index: 1001;
+    display : flex;
+    position: fixed;
+    width   : 50px;
+    height  : 50px;
+    z-index : 1001;
 }
 
-input {
-    width             : 100%;
-    /* height         : 50%; */
+.colorPicker {
+    position          : fixed;
     appearance        : none;
     -webkit-appearance: none;
     box-sizing        : unset;
     border-width      : 0px;
+    border-color      : transparent;
     outline-width     : 0px;
     border            : none;
     margin            : 0;
     padding           : 0;
 }
 
+.flood .colorPicker {
+    left : 2px;
+    width: 47px;
+}
+
+.specularLighting .colorPicker {
+    width : 25px;
+    bottom: 1px;
+    left  : 1.5px;
+}
+
+.diffuseLighting .colorPicker {
+    width : 20px;
+    height: 30px;
+    left  : 17px;
+    top   : 10.5px;
+}
+
+.floodMain {
+    fill: gray;
+}
+
 .funcR {
-    fill: red;
+    fill: var(--R);
 }
 
 .funcG {
-    fill: green;
+    fill: var(--G);
 }
 
 .funcB {
-    fill: blue;
+    fill: var(--B);
 }
 
 .funcA {
-    fill: white;
+    fill: var(--A);
 }
-
-/* .func{
-    fill: none;
-    stroke-width: 1;
-    stroke: black
-} */
 
 .funcButton {
     fill        : red;
@@ -221,7 +250,7 @@ input {
     rx              : 5;
     ry              : 5;
     fill            : lightblue;
-    stroke          : gold;
+    stroke          : var(--yellow);
     stroke-width    : 2;
     stroke-dasharray: 3;
 }
@@ -243,24 +272,30 @@ input {
 }
 
 /* colorMatrix */
-.matrixPanel{
+.matrixPanel {
     fill: darkgray
 }
 
-.panelRear{
-    fill:lightgray
+.panelRear {
+    fill: lightgray
 }
 
 /* blend */
-.blend{
-    fill: aliceblue;
+.blend {
+    fill            : aliceblue;
     stroke-dasharray: 6;
-stroke-width: 4;
-stroke: aliceblue;
+    stroke-width    : 4;
+    stroke          : aliceblue;
 }
 
-.imageMain{
-    fill: yellow;
-    stroke-linecap: round;
+.imageMain {
+    fill           : var(--yellow);
+    stroke-width   : 2px;
+    stroke         : var(--yellow);
+    stroke-linecap : round;
     stroke-linejoin: round;
+}
+
+.imageRear {
+    fill: var(--blue-dark);
 }

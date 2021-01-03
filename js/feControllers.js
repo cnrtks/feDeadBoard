@@ -29,7 +29,24 @@ const filterDefs = document.getElementById("filterDefs");
 
 //FIXME: should be in lib
 getCssVar = function (value) {
-  return window.getComputedStyle(document.body).getPropertyValue(value);
+  return window.getComputedStyle(document.body).getPropertyValue(value).trim();
+};
+
+randomColor = function () {
+  colors = [
+    "--R",
+    "--G",
+    "--B",
+    "--A",
+    "--yellow",
+    "--green-dark",
+    "--blue-dark",
+  ];
+  return getCssVar(gsap.utils.random(colors));
+};
+
+nextArrayElement = function (arr, el) {
+  return gsap.utils.wrap(arr, arr.indexOf(el) + 1);
 };
 
 class Controller {
@@ -41,7 +58,6 @@ class Controller {
     this.initX = controllerArr[index].initX;
     this.initY = controllerArr[index].initY;
     this.controllerArrayIndex = index;
-    this.filterSpecificEnumIndex = 0;
     this.controller = this.createController();
     $(this.controller).addClass("controller");
     this.initController(this.controller, this.initX, this.initY);
@@ -120,30 +136,36 @@ class Controller {
     Draggable.create(targetId, {
       type: type,
       bounds: {
-        height: params.max ? params.max : 50,
-        top: params.min ? params.min : 0,
+        top: params.max ? params.max : 0,
+        height: params.min ? params.min : 50,
         left: params.min ? params.min : 0,
         width: params.max ? params.max : 50,
       },
       onDrag: function () {
-        console.log(((type == "x" ? this.x : this.y) + offset) * multiplyer);
         gsap.set(thisClass.fe, {
           attr: {
             [attribute]: params.truncate
               ? Math.trunc(
-                  (type == "x" ? this.x : this.y) * multiplyer + offset
+                  ((type == "x" ? this.x : this.y) + offset) * multiplyer
                 )
-              : (type == "x" ? this.x : this.y) * multiplyer + offset,
+              : ((type == "x" ? this.x : this.y) + offset) * multiplyer,
           },
         });
       },
     });
   }
-  nextEnum() {
-    return gsap.utils.wrap(
-      this.filterSpecificEnum,
-      ++this.filterSpecificEnumIndex
+  createColorPicker(className) {
+    let colorPicker = document.createElement("input");
+    colorPicker.setAttribute("type", "color");
+    colorPicker.setAttribute(
+      "class",
+      this.controllerId + "ColorPicker colorPicker"
     );
+    $(colorPicker).addClass(className);
+    colorPicker.setAttribute("value", this.color);
+    let fo = createSvgElement("foreignObject");
+    fo.appendChild(colorPicker);
+    return fo;
   }
   initVars() {
     return null;
@@ -159,6 +181,7 @@ class FilterElement extends Controller {
     this.fe.setAttributeNS(null, "result", this.id);
     this.prev = null;
     this.next = null;
+    this.wires = [];
     this.drag();
   }
   drag() {
@@ -379,7 +402,6 @@ class DisplacementMap extends FilterElement {
     $(`.${this.controllerId + axis}Channel .activeChannel`).removeClass(
       "activeChannel"
     );
-    console.log(`.${this.controllerId + axis} .${this.controllerId + channel}`);
     $(
       `.${this.controllerId + axis}Channel .${this.controllerId + channel}`
     ).addClass("activeChannel");
@@ -403,14 +425,14 @@ class Turbulence extends FilterElement {
     });
     super.attrSlider(`.${this.controllerId}NumOctavesTab`, "numOctaves", {
       type: "y",
-      min: -5,
+      max: -5,
       multiplyer: -0.5,
       offset: -1,
       truncate: true,
     });
     super.attrSlider(`.${this.controllerId}BaseFrequencyTab`, "baseFrequency", {
       type: "y",
-      min: 6,
+      max: 6,
       multiplyer: 1 / 100,
       offset: 0.001,
     });
@@ -478,19 +500,60 @@ class Turbulence extends FilterElement {
   }
 }
 
-class SpecularLighting extends FilterElement {
+class LightingElement extends FilterElement {
   constructor(id, index) {
     super(id, index);
+    $(this.controller).addClass("lightingElement");
+    $(`.${this.controllerId}ColorPicker`).change((e) => {
+      this.changeColor(e.target.value);
+    });
+  }
+  initVars() {
+    this.color = randomColor();
     this.lse = null;
-    this.slide(this.controllerId + "Constant", "specularConstant");
-    this.slide(this.controllerId + "Exponent", "specularConstant");
-    this.slide(this.controllerId + "Scale", "surfaceScale");
+  }
+  changeColor(color) {
+    this.color = color;
+    gsap.set(this.fe, { attr: { [LIGHTING_COLOR]: this.color } });
+    try {
+      gsap.to(`.${this.lse.controllerId} .bulb`, {
+        duration: dur,
+        fill: this.color,
+      });
+    } catch {}
+  }
+}
+
+class SpecularLighting extends LightingElement {
+  constructor(id, index) {
+    super(id, index);
+    super.attrSlider(`.${this.controllerId}Constant`, "specularConstant", {
+      type: "y",
+      max: 7,
+      min: 40,
+      multiplyer: -1 / 30,
+      offset: -3.1,
+    });
+    super.attrSlider(`.${this.controllerId}Exponent`, "specularExponent", {
+      type: "y",
+      max: 7,
+      min: 40,
+      multiplyer: -1 / 5,
+    });
+    super.attrSlider(`.${this.controllerId}Scale`, "surfaceScale", {
+      type: "y",
+      max: 10,
+      min: 37,
+      multiplyer: -1,
+      offset: 14,
+    });
   }
   createController() {
     let g = group({
       id: this.controllerId,
-      class: this.controllerId + " lightingElement",
+      class: `${this.controllerId} specularLighting`,
     });
+    g.appendChild(super.createColorPicker());
     g.appendChild(
       path({
         d: $(".specularLightingMain").attr("d"),
@@ -499,9 +562,6 @@ class SpecularLighting extends FilterElement {
     );
     g.appendChild(
       path({ d: $(".specularLightingSocket").attr("d"), class: "lightSocket" })
-    );
-    g.appendChild(
-      path({ d: $(".specularLightingColor").attr("d"), class: "colorPicker" })
     );
     g.appendChild(
       line({
@@ -551,10 +611,9 @@ class SpecularLighting extends FilterElement {
     return g;
   }
   createFe() {
-    //FIXME:lighting-color isnt being set this way, update attribute after element is generated. possible xml ns issue ???
     return createSvgElement("feSpecularLighting", {
       id: this.id + "Fe",
-      [LIGHTING_COLOR]: "red",
+      [LIGHTING_COLOR]: this.color,
       specularConstant: 1,
       specularExponent: 1,
     });
@@ -575,18 +634,27 @@ class SpecularLighting extends FilterElement {
   }
 }
 
-class DiffuseLighting extends FilterElement {
+class DiffuseLighting extends LightingElement {
   constructor(id, index) {
     super(id, index);
-    this.lse = null;
-    this.slide(this.controllerId + "Scale", "surfaceScale");
-    this.slide(this.controllerId + "Constant", "diffuseConstant");
+    this.attrSlider(`.${this.controllerId}Scale`, "surfaceScale", {
+      min: 10,
+      max: 30,
+      offset: 3,
+    });
+    this.attrSlider(`.${this.controllerId}Constant`, "diffuseConstant", {
+      min: 10,
+      max: 30,
+      offset: -1,
+      multiplyer: 1 / 5,
+    });
   }
   createController() {
     let g = group({
       id: this.controllerId,
-      class: this.controllerId + " lightingElement",
+      class: `${this.controllerId} diffuseLighting`,
     });
+    g.appendChild(this.createColorPicker());
     g.appendChild(
       path({
         d: $("#diffuseLightingMain").attr("d"),
@@ -595,9 +663,6 @@ class DiffuseLighting extends FilterElement {
     );
     g.appendChild(
       path({ d: $("#diffuseLightingSocket").attr("d"), class: "lightSocket" })
-    );
-    g.appendChild(
-      path({ d: $("#diffuseLightingColor").attr("d"), class: "colorPicker" })
     );
     g.appendChild(
       line({
@@ -662,7 +727,7 @@ class Composite extends FilterElement {
       "out",
     ];
     $("#" + this.controllerId + "OperatorSwitch").click(() => {
-      this.changeOperator(this);
+      this.changeOperator();
     });
   }
   createController() {
@@ -698,7 +763,10 @@ class Composite extends FilterElement {
     });
   }
   changeOperator() {
-    let operator = this.nextEnum();
+    let operator = nextArrayElement(
+      this.filterSpecificEnum,
+      this.fe.getAttributeNS(null, "operator")
+    );
     gsap.to("." + this.controllerId + "Operator", {
       duration: dur,
       morphSVG: `#${operator}`,
@@ -748,7 +816,10 @@ class Blend extends FilterElement {
     });
   }
   changeMode() {
-    let mode = this.nextEnum();
+    let mode = nextArrayElement(
+      this.filterSpecificEnum,
+      this.fe.getAttributeNS(null, "mode")
+    );
     gsap.set(this.fe, { attr: { mode: mode } });
   }
 }
@@ -897,8 +968,10 @@ class ColorMatrix extends FilterElement {
     $(this.fe).attr("values", this.matrix);
   }
   changeType() {
-    let type = this.nextEnum();
-    //TODO: some visual change to indicate the type has changed
+    let type = nextArrayElement(
+      this.filterSpecificEnum,
+      this.fe.getAttributeNS(null, "type")
+    );
     switch (type) {
       case "matrix":
         super.attrKnob($(`.${this.controllerId}ValueDial`), null, {});
@@ -938,21 +1011,19 @@ class Flood extends FilterElement {
       multiplyer: 1 / 360,
     });
   }
+  initVars() {
+    this.color = randomColor();
+  }
   createController() {
-    let g = group({ id: this.controllerId, class: this.controllerId });
-    let colorPicker = document.createElement("input");
-    colorPicker.setAttribute("type", "color");
-    colorPicker.setAttribute("class", this.controllerId + "ColorPicker");
-    let fo = createSvgElement("foreignObject");
-    fo.appendChild(colorPicker);
-    g.appendChild(fo);
+    let g = group({
+      id: this.controllerId,
+      class: `${this.controllerId} flood`,
+    });
+    g.appendChild(this.createColorPicker());
     g.appendChild(
       path({
-        d:
-          "M 0.38,0.00 C 0.75,-2.75 50.88,-2.38 50.12,0.25 51.75,41.88 46.38,50.00 25.00,48.88 3.62,47.75 -2.25,38.88 0.38,0.00 Z  M 42.25,17.38 C 47.38,14.88 47.50,11.38 45.62,8.25 43.75,5.12 12.00,4.62 9.00,7.38 6.00,10.12 4.25,15.62 7.25,17.75 10.25,19.88 37.12,19.88 42.25,17.38 Z",
-
-        fill: "white",
-        class: this.triggerId,
+        d: $("#floodMain").attr("d"),
+        class: `${this.triggerId} floodMain`,
       })
     );
     let useDial = use({
@@ -966,7 +1037,7 @@ class Flood extends FilterElement {
   createFe() {
     return createSvgElement("feFlood", {
       id: this.id + "Fe",
-      [FLOOD_COLOR]: "yellow",
+      [FLOOD_COLOR]: this.color,
       [FLOOD_OPACITY]: 0.5,
     });
   }
@@ -996,7 +1067,7 @@ class ComponentTransfer extends FilterElement {
           width: "50px",
           class: "func func" + c.name + " " + this.triggerId,
           y: row * 10 + 5,
-          [CLIP_PATH]: `url(#${this.controllerId}ClipPath)`
+          [CLIP_PATH]: `url(#${this.controllerId}ClipPath)`,
         })
       );
       let typeSwitch = rect({
@@ -1069,10 +1140,10 @@ class ComponentTransfer extends FilterElement {
   }
   changeType(compIndex) {
     gsap.set(this.fe.childNodes[compIndex], {
-      attr: { type: this.nextEnum(compIndex) },
+      attr: { type: this.nextComponent(compIndex) },
     });
   }
-  nextEnum(compIndex) {
+  nextComponent(compIndex) {
     return gsap.utils.wrap(
       this.filterSpecificEnum,
       ++this.compArr[compIndex].typeIndex
@@ -1112,18 +1183,24 @@ class Image extends FilterElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       rect({
-        class: this.triggerId,
+        class: `${this.triggerId} imageRear`,
         x: 5,
         y: 5,
         width: 40,
         height: 40,
-        fill: "purple",
         rx: 5,
-        ry:5,
+        ry: 5,
       })
     );
-    g.appendChild(circle({r: 5, cx: 35, cy: 15, class: "imageMain"}));
-    g.appendChild(polyline({class: "imageMain", points: "10,40 20,20 30,35, 33,30 40,40"}))
+    g.appendChild(
+      circle({ r: 5, cx: 35, cy: 15, class: `${this.triggerId} imageMain` })
+    );
+    g.appendChild(
+      polyline({
+        class: `${this.triggerId} imageMain`,
+        points: "10,40 20,20 30,35, 33,30 40,40",
+      })
+    );
     return g;
   }
   createFe() {
@@ -1136,7 +1213,14 @@ class Image extends FilterElement {
     this.filterSpecificEnum = imageArr;
   }
   nextImage() {
-    gsap.set(this.fe, { attr: { href: super.nextEnum() } });
+    gsap.set(this.fe, {
+      attr: {
+        href: nextArrayElement(
+          this.filterSpecificEnum,
+          this.fe.getAttributeNS(null, "href")
+        ),
+      },
+    });
   }
 }
 
@@ -1220,7 +1304,11 @@ class LightSourceElement extends Controller {
     //this probably wont work
     $(lightElementClass.fe).html();
     lightElementClass.fe.appendChild(lseClass.fe);
-    //update currentfilters
+    gsap.to(`.${lseClass.controllerId} .bulb`, {
+      duration: dur,
+      fill: lightElementClass.color,
+    });
+    updateAllFilters();
   }
   resetLse() {
     this.fe.remove();
@@ -1326,7 +1414,7 @@ class SpotLight extends LightSourceElement {
       path({ d: $("#spotBulbRear").attr("d"), class: "spotBulbRear" })
     );
     g.appendChild(
-      path({ d: $("#spotBulbAngle").attr("d"), class: "spotBulbAngle" })
+      path({ d: $("#spotBulbAngle").attr("d"), class: "spotBulbAngle bulb" })
     );
     g.appendChild(
       path({
@@ -1392,7 +1480,7 @@ class Connector extends Controller {
         points: "25,25 25,25 25,25 25,25",
         strokeWidth: 5,
         stroke: "black",
-        class: "wire"
+        class: "wire",
       })
     );
     g.appendChild(
@@ -1727,6 +1815,9 @@ importExternalSvg = function () {
   );
   $("#controllerColorMatrixContainer").load(
     "/assets/controllers/controllerColorMatrix.svg"
+  );
+  $("#controllerFloodContainer").load(
+    "/assets/controllers/controllerFlood.svg"
   );
 
   $("#compositeOperatorContainer").load(

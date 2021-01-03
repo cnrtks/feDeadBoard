@@ -13,6 +13,7 @@ nextEnum should be replace with a function that gets the indexOf the current bla
 you shoudl remove this.controllerspecificindex and rename the arrays,
 !!!
 
+look into why compoite (and maybe others) are double clicking
 
  cleaan up query selectors (consistent passing of elements vs classes into drag and such)
 the drag functions need to be simplified and unified and something
