@@ -15,6 +15,8 @@ you shoudl remove this.controllerspecificindex and rename the arrays,
 
 look into why compoite (and maybe others) are double clicking
 
+move descriptions to array
+
  cleaan up query selectors (consistent passing of elements vs classes into drag and such)
 the drag functions need to be simplified and unified and something
 lower default inrertia velocity

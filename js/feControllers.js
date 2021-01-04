@@ -2,6 +2,7 @@ const dur = 0.3;
 const timeout = 500;
 const oneRotation = 360;
 const morphRadiusRatio = 5;
+const TRANSFORM_ORIGIN = "transform-origin";
 const LIGHTING_COLOR = "lighting-color";
 const FLOOD_COLOR = "flood-color";
 const FLOOD_OPACITY = "flood-opacity";
@@ -206,6 +207,11 @@ class Morphology extends FilterElement {
       id: this.controllerId,
     });
     g.appendChild(
+      title(
+        "Morphology: Drag the grey tab to increase growth; click to shrink instead"
+      )
+    );
+    g.appendChild(
       path({
         d: $(".morphologyDilate").attr("d"),
         class: "controllerState",
@@ -253,7 +259,6 @@ class Morphology extends FilterElement {
 class GaussianBlur extends FilterElement {
   constructor(id, index) {
     super(id, index);
-    //FIXME: change the svgOrigin of all of these once outside the class and geti it out of herer
     gsap.set(".controllerGaussianBlurInner", { svgOrigin: "25 25" });
     super.attrKnob(
       "." + this.controllerId + "StdDeviation",
@@ -266,6 +271,11 @@ class GaussianBlur extends FilterElement {
       class: this.controllerId,
       id: this.controllerId,
     });
+    g.appendChild(
+      title(
+        "GaussianBlur: Drag the off-center lens to increase or decrease blurriness"
+      )
+    );
     g.appendChild(
       circle({
         cx: 25,
@@ -312,12 +322,17 @@ class DisplacementMap extends FilterElement {
   }
   initVars() {
     this.filterSpecificEnum = ["R", "G", "B", "A"];
-    this.xChannelSelector = "A";
-    this.yChannelSelector = "A";
+    this.xChannelSelector = "R";
+    this.yChannelSelector = "R";
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
     let thisClass = this;
+    g.appendChild(
+      title(
+        "DisplacementMap: Displaces a shape based on the colors plugged into it; press the buttons to change which color value used"
+      )
+    );
     g.appendChild(
       path({
         d: $("#displacementMapButtonX").attr("d"),
@@ -380,6 +395,8 @@ class DisplacementMap extends FilterElement {
       id: this.id + "Fe",
       scale: 250,
       in: "SourceGraphic",
+      xChannelSelector: "R",
+      yChannelSelector: "R",
     });
   }
   channelButton(axis) {
@@ -440,6 +457,11 @@ class Turbulence extends FilterElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(
+      title(
+        "Turbulence: works best when plugged into a DisplacementMap; use the switch to change type and the tabs to change base frequency and the number of octaves"
+      )
+    );
     let clipPathOctaves = createSvgElement("clipPath", {
       id: `${this.controllerId}NumOctavesClip`,
     });
@@ -554,6 +576,11 @@ class SpecularLighting extends LightingElement {
       id: this.controllerId,
       class: `${this.controllerId} specularLighting`,
     });
+    g.appendChild(
+      title(
+        "SpecularLighting: Adds the shiny high-lights from a light source; must drag a bulb on top for it to work"
+      )
+    );
     g.appendChild(super.createColorPicker());
     g.appendChild(
       path({
@@ -655,6 +682,11 @@ class DiffuseLighting extends LightingElement {
       id: this.controllerId,
       class: `${this.controllerId} diffuseLighting`,
     });
+    g.appendChild(
+      title(
+        "DiffuseLighting: Adds the soft low-lights from a light source; must drag a bulb on top for it to work"
+      )
+    );
     g.appendChild(this.createColorPicker());
     g.appendChild(
       path({
@@ -700,25 +732,20 @@ class DiffuseLighting extends LightingElement {
   createFe() {
     return createSvgElement("feDiffuseLighting", { id: this.id + "Fe" });
   }
-  slide(slider, attribute) {
-    let thisClass = this;
-    let boundEl = $("." + slider + "Bounds")[0];
-    let attrOffset = attribute == "diffuseConstant" ? 0.1 : 1;
-    Draggable.create("." + slider, {
-      type: "x",
-      edgeResistance: 1,
-      bounds: boundEl,
-      onDrag: function (e) {
-        $(thisClass.fe).attr(attribute, (this.y - 2) * attrOffset);
-      },
-    });
-  }
 }
 
 class Composite extends FilterElement {
   constructor(id, index) {
     super(id, index);
-    $(this.conrtroller).addClass("in2");
+    $(this.controller).addClass("in2");
+    $("#" + this.triggerId + "OperatorSwitch")
+      .unbind("click")
+      .click((e) => {
+        console.log("cicked");
+        this.changeOperator();
+      });
+  }
+  initVars() {
     this.filterSpecificEnum = [
       "over",
       "xor",
@@ -727,22 +754,31 @@ class Composite extends FilterElement {
       "in",
       "out",
     ];
-    $("#" + this.controllerId + "OperatorSwitch").click(() => {
-      this.changeOperator();
-    });
   }
   createController() {
     let g = group({
       id: this.controllerId,
       class: this.controllerId + " composite",
     });
+    g.appendChild(
+      title(
+        "Composite: This determines how two colors behave when they overlap; click for different modes"
+      )
+    );
     g.appendChild(circle({ r: 20, cx: 25, cy: 25, class: this.triggerId }));
     let operatorSwitch = group({
       id: this.controllerId + "OperatorSwitch",
       class: this.controllerId + "OperatorSwitch",
     });
     operatorSwitch.appendChild(
-      circle({ r: 12, cx: 25, cy: 25, class: this.triggerId, stroke: "black" })
+      circle({
+        r: 12,
+        cx: 25,
+        cy: 25,
+        class: this.triggerId,
+        id: this.triggerId + "OperatorSwitch",
+        stroke: "black",
+      })
     );
     operatorSwitch.appendChild(
       path({
@@ -779,6 +815,12 @@ class Composite extends FilterElement {
 class Blend extends FilterElement {
   constructor(id, index) {
     super(id, index);
+    $("." + this.controllerId).click(() => {
+      gsap.to(this.controller, { duration: dur, rotation: "+=22.5" });
+      this.changeMode(this);
+    });
+  }
+  initVars() {
     this.filterSpecificEnum = [
       "normal",
       "screen",
@@ -797,13 +839,14 @@ class Blend extends FilterElement {
       "saturation",
       "color",
     ];
-    $("." + this.controllerId).click(() => {
-      gsap.to(this.controller, { duration: dur, rotation: "+=22.5" });
-      this.changeMode(this);
-    });
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(
+      title(
+        "Blend: This determines how two colors behave when they overlap; click for different modes"
+      )
+    );
     gsap.set(g, { svgOrigin: "25 25" });
     g.appendChild(
       circle({ class: `${this.triggerId} blend`, r: 15, cx: 25, cy: 25 })
@@ -814,6 +857,7 @@ class Blend extends FilterElement {
     return createSvgElement("feBlend", {
       id: this.id + "Fe",
       in: "SourceGraphic",
+      mode: "hard-light",
     });
   }
   changeMode() {
@@ -832,6 +876,7 @@ class Offset extends FilterElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(title("Offset: This one just moves things"));
     g.appendChild(
       rect({
         x: 2,
@@ -851,7 +896,6 @@ class Offset extends FilterElement {
         y: 12,
         width: 26,
         height: 26,
-
         fill: "gray",
       })
     );
@@ -905,6 +949,11 @@ class ColorMatrix extends FilterElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(
+      title(
+        "ColorMatrix: Press the circles to flip values, or press the switch to control saturation or hue with the dial in the top right"
+      )
+    );
     g.appendChild(
       path({
         d: $("#colorMatrixRear").attr("d"),
@@ -1020,6 +1069,11 @@ class Flood extends FilterElement {
       id: this.controllerId,
       class: `${this.controllerId} flood`,
     });
+    g.appendChild(
+      title(
+        "Flood: Floods the entire space with a single color, works best when plugged into Composite or Blend"
+      )
+    );
     g.appendChild(this.createColorPicker());
     g.appendChild(
       path({
@@ -1051,7 +1105,11 @@ class ComponentTransfer extends FilterElement {
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
     let dialW = 5;
-
+    g.appendChild(
+      title(
+        "ComponentTransfer: The switches on the left determine the mode for each color channel and the dials modify aspects depending on the mode"
+      )
+    );
     let clipPath = createSvgElement("clipPath", {
       id: `${this.controllerId}ClipPath`,
     });
@@ -1083,7 +1141,6 @@ class ComponentTransfer extends FilterElement {
       });
       func.appendChild(typeSwitch);
       this.attrArr.forEach((a, col) => {
-        // todo: the fuck is up with this?
         let idString = this.controllerId + "Row" + row + "Col" + col;
         let attrKnob = use({
           href: "#genericDial",
@@ -1111,7 +1168,7 @@ class ComponentTransfer extends FilterElement {
       compTrans.appendChild(
         createSvgElement("feFunc" + c.name, {
           class: this.id + "FeFunc",
-          type: "identity",
+          type: "gamma",
           tableValues: "1 1 0 0",
           slope: 0.5,
           intercept: 0.25,
@@ -1183,6 +1240,11 @@ class Image extends FilterElement {
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
+      title(
+        "Image: This works best when plugged into any of the FilterElements with complicated sounding names (try plugging it into the displacement map). click for different images"
+      )
+    );
+    g.appendChild(
       rect({
         class: `${this.triggerId} imageRear`,
         x: 5,
@@ -1231,6 +1293,11 @@ class Tile extends FilterElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(
+      title(
+        "This one seems like it would be the simplest but I didnt get it to work yet"
+      )
+    );
     g.appendChild(
       rect({
         class: this.triggerId,
@@ -1331,6 +1398,11 @@ class PointLight extends LightSourceElement {
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
+      title(
+        "Spotlight: Drag onto 'SpecularLighting' or 'DiffuseLighting' for a nearby light source"
+      )
+    );
+    g.appendChild(
       path({
         d: $("#bulbThreads").attr("d"),
         class: "bulbThreads",
@@ -1362,6 +1434,11 @@ class DistantLight extends LightSourceElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(
+      title(
+        "Spotlight: Drag onto 'SpecularLighting' or 'DiffuseLighting' for a far off light source. The crescent shapes can be dragged to change elevation and azimuth, whatever that is"
+      )
+    );
     g.appendChild(
       path({
         d: $("#bulbThreads").attr("d"),
@@ -1407,6 +1484,11 @@ class SpotLight extends LightSourceElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(
+      title(
+        "Spotlight: Drag onto 'SpecularLighting' or 'DiffuseLighting' for focused lighting"
+      )
+    );
     g.appendChild(
       path({ d: $("#bulbThreads").attr("d"), class: "bulbThreads" })
     );
@@ -1466,11 +1548,17 @@ class Connector extends Controller {
     this.femaleClasses = this.controllerId + "Head female connector";
     let g = group();
     g.appendChild(
+      title(
+        "Connector: Connect the pink end to a FilterElement and the blue end to a socket, or another FilterElement"
+      )
+    );
+    g.appendChild(
       path({
         id: this.controllerId + "Male",
         class: this.maleClasses,
         fill: "lightblue",
         d: $("#connectorMale").attr("d"),
+        transform: "translate(50)",
       })
     );
     wireLayer.appendChild(
@@ -1488,6 +1576,7 @@ class Connector extends Controller {
         class: this.femaleClasses,
         fill: "magenta",
         d: $("#connectorFemale").attr("d"),
+        transform: "translate(-50)",
       })
     );
     return g;
@@ -1607,6 +1696,11 @@ class FilterSocket extends Controller {
       id: this.controllerId,
       class: this.controllerId + " filterSocket",
     });
+    g.appendChild(
+      title(
+        "Socket: plug the blue end of a connector here in order to make a filter"
+      )
+    );
     g.appendChild(rect({ class: "socket", width: 50, height: 50 }));
     return g;
   }
@@ -1670,13 +1764,6 @@ updateAllFilters = function () {
 
 let controllerArr = [
   {
-    name: "FilterSocket",
-    constructor: FilterSocket,
-    counter: 0,
-    initX: 11,
-    initY: 3,
-  },
-  {
     name: "Connector",
     constructor: Connector,
     counter: 0,
@@ -1687,8 +1774,8 @@ let controllerArr = [
     name: "Morphology",
     constructor: Morphology,
     counter: 0,
-    initX: 0,
-    initY: 0,
+    initX: 1,
+    initY: 1,
   },
   {
     name: "GaussianBlur",
@@ -1701,8 +1788,8 @@ let controllerArr = [
     name: "DisplacementMap",
     constructor: DisplacementMap,
     counter: 0,
-    initX: 0,
-    initY: 2,
+    initX: 2,
+    initY: 3,
   },
   {
     name: "Turbulence",
@@ -1722,44 +1809,64 @@ let controllerArr = [
     name: "DiffuseLighting",
     constructor: DiffuseLighting,
     counter: 0,
-    initX: 0,
-    initY: 5,
+    initX: 1,
+    initY: 4,
   },
-  { name: "Composite", constructor: Composite, counter: 0, initX: 0, initY: 6 },
-  { name: "Blend", constructor: Blend, counter: 0, initX: 1, initY: 1 },
-  { name: "Offset", constructor: Offset, counter: 0, initX: 1, initY: 2 },
+  { name: "Composite", constructor: Composite, counter: 0, initX: 0, initY: 2 },
+  { name: "Blend", constructor: Blend, counter: 0, initX: 1, initY: 2 },
+  { name: "Offset", constructor: Offset, counter: 0, initX: 2, initY: 1 },
   {
     name: "ColorMatrix",
     constructor: ColorMatrix,
     counter: 0,
-    initX: 1,
-    initY: 3,
+    initX: 0,
+    initY: 6,
   },
-  { name: "Flood", constructor: Flood, counter: 0, initX: 1, initY: 4 },
+  { name: "Flood", constructor: Flood, counter: 0, initX: 2, initY: 2 },
   {
     name: "ComponentTransfer",
     constructor: ComponentTransfer,
     counter: 0,
     initX: 1,
-    initY: 5,
+    initY: 6,
   },
-  { name: "Image", constructor: Image, counter: 0, initX: 1, initY: 6 },
-  { name: "Tile", constructor: Tile, counter: 0, initX: 2, initY: 0 },
+  { name: "Image", constructor: Image, counter: 0, initX: 1, initY: 3 },
   {
     name: "PointLight",
     constructor: PointLight,
     counter: 0,
-    initX: 2,
-    initY: 1,
+    initX: 0,
+    initY: 5,
   },
   {
     name: "DistantLight",
     constructor: DistantLight,
     counter: 0,
-    initX: 2,
-    initY: 2,
+    initX: 1,
+    initY: 5,
   },
-  { name: "SpotLight", constructor: SpotLight, counter: 0, initX: 2, initY: 3 },
+  { name: "SpotLight", constructor: SpotLight, counter: 0, initX: 2, initY: 5 },
+  {
+    name: "FilterSocket",
+    constructor: FilterSocket,
+    counter: 0,
+    initX: 12,
+    initY: 3,
+  },
+  {
+    name: "FilterSocket",
+    constructor: FilterSocket,
+    counter: 1,
+    initX: 12,
+    initY: 1,
+  },
+  {
+    name: "FilterSocket",
+    constructor: FilterSocket,
+    counter: 2,
+    initX: 12,
+    initY: 5,
+  },
 ];
 
 generateController = function (controllerKey) {
@@ -1776,14 +1883,24 @@ generateAllControllers = function () {
 generateNewControllerButtons = function () {
   let buttonLayer = document.getElementById("newControllerButtonLayer");
   controllerArr.forEach((c, index) => {
-    let newButton = circle({
+    let newButton = group({
       class: "newControllerButton",
       id: `new${c.name}Button`,
-      r: 10,
-      cx: 25,
-      cy: 25,
-      fill: "white",
     });
+    newButton.appendChild(
+      circle({
+        r: 12,
+        cx: 25,
+        cy: 25,
+        fill: "white",
+      })
+    );
+    newButton.appendChild(
+      polyline({
+        points:
+          "23,23 23,15 27,15 27,23 35,23 35,27 27,27 27,35 23,35 23,27 15,27 15,23",
+      })
+    );
     $(newButton).click(() => {
       generateController(index);
     });
@@ -1793,6 +1910,9 @@ generateNewControllerButtons = function () {
 };
 generateNewControllerButtons();
 
+postImportLoad = function () {
+  generateAllControllers();
+};
 //get the temp function calls out of here
 importExternalSvg = function () {
   $("#controllerMorphologyContainer").load(
@@ -1822,8 +1942,6 @@ importExternalSvg = function () {
     "/assets/controllers/compositeOperatorPaths.svg"
   );
   $("#bulbsContainer").load("/assets/controllers/bulbs.svg");
-  $("#canvasLayer").load("/assets/skull.svg", () => {
-    generateAllControllers();
-  });
+  $("#canvasLayer").load("/assets/skull.svg", postImportLoad);
 };
 importExternalSvg();

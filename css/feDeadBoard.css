@@ -37,10 +37,26 @@ svg {
 }
 
 #skull {
+    filter: url(#filter1);
+    fill  : teal;
+}
+
+#svgSkull {
+    filter: url(#filter0);
+}
+
+#jaw {
+    fill  : var(--R);
+    filter: url(#filter2);
+}
+
+#FilterSocket1Controller rect {
     fill: teal;
 }
 
-#jaw {}
+#FilterSocket2Controller rect {
+    fill: var(--R);
+}
 
 .eye {
     fill: var(--G);
@@ -48,10 +64,6 @@ svg {
 
 .nostril {
     fill: darkgray;
-}
-
-#jaw {
-    fill: palevioletred;
 }
 
 #jawDetails {
@@ -255,10 +267,6 @@ foreignObject {
     stroke-dasharray: 3;
 }
 
-#svgSkull {
-    filter: url(#filter0);
-}
-
 .channelIndicator:not(.activeChannel) {
     fill: black;
 }
@@ -300,15 +308,15 @@ foreignObject {
     fill: var(--blue-dark);
 }
 
-.connector{
-    stroke: black;
-    stroke-width: 2;
+.connector {
+    stroke          : black;
+    stroke-width    : 2;
 }
 
-.connector.male{
+.connector.male {
     fill: skyblue;
 }
 
-.connector.female{
+.connector.female {
     fill: thistle;
 }

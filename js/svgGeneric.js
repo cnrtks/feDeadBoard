@@ -20,6 +20,12 @@ defs = function (params) {
   return createSvgElement("defs", params);
 };
 
+title = function(text, params){
+  let title = createSvgElement("title", params);
+  title.textContent = text;
+  return title;
+}
+
 group = function (params) {
   return createSvgElement("g", params);
 };
