@@ -32,6 +32,14 @@ svg {
     stroke-linecap  : round;
 }
 
+.wire.connector2{
+    stroke: pink;
+}
+
+.wire.merge{
+    stroke: green;
+}
+
 #deadBoard {
     background-color: black;
 }

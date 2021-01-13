@@ -5,73 +5,53 @@ let ns = {
 };
 
 //create svg elements
-createSvgElement = function (element, params) {
+createSvgElement = function (element, params = {}, content) {
   let e = document.createElementNS(ns.svg, element);
   if (!params) return e;
   Object.entries(params).forEach((p) => {
     const [attribute, value] = p;
     e.setAttributeNS(null, attribute, value);
   });
+  if (content) e.textContent = content;
   return e;
 };
 
 //shortcuts for common elements
-defs = function (params) {
-  return createSvgElement("defs", params);
+defs = function (params, content) {
+  return createSvgElement("defs", params, content);
 };
 
-title = function(text, params){
-  let title = createSvgElement("title", params);
-  title.textContent = text;
-  return title;
-}
-
-group = function (params) {
-  return createSvgElement("g", params);
+title = function (params, content) {
+  return createSvgElement("title", params, content);
 };
 
-path = function (params) {
-  return createSvgElement("path", params);
+group = function (params, content) {
+  return createSvgElement("g", params, content);
 };
 
-use = function (params) {
-  return createSvgElement("use", params);
+path = function (params, content) {
+  return createSvgElement("path", params, content);
 };
 
-rect = function (params) {
-  return createSvgElement("rect", params);
+use = function (params, content) {
+  return createSvgElement("use", params, content);
 };
 
-circle = function (params) {
-  return createSvgElement("circle", params);
+rect = function (params, content) {
+  return createSvgElement("rect", params, content);
 };
 
-line = function (params) {
-  return createSvgElement("line", params);
+circle = function (params, content) {
+  return createSvgElement("circle", params, content);
 };
 
-polyline = function (params) {
-  return createSvgElement("polyline", params);
+line = function (params, content) {
+  return createSvgElement("line", params, content);
 };
 
-//filter stuff
-//filterElement
-// filterElement = function () {
-//   let filterElement = createSvgElement(fe.name, fe.params);
-//   fe.subElements.forEach((sFe) => {
-//     filterElement(sFe.name, sFe.params);
-//   });
-//   filter.appendChild(filterElement);
-// };
-
-// filter = function (params) {
-//   // {filterParams[id, filterUnits, etc], filterElements[{name, params, subElements(for like merge and specular lighting and shit)}]}
-//   let filter = createSvgElement("filter", params.filterParams);
-//   params.filterElements.forEach((fe) => {
-//     filterElements(fe.name, fe.params, fe.subElements);
-//   });
-//   return filter;
-// };
+polyline = function (params, content) {
+  return createSvgElement("polyline", params, content);
+};
 
 getCenterX = function (el) {
   let bBox = el.getBoundingClientRect();

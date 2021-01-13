@@ -112,14 +112,14 @@ class Controller {
   }
   attrKnob(targetId, attribute, params) {
     let thisClass = this;
-    let offset = params.offset ? params.offset : 0;
-    let multiplyer = params.multiplyer ? params.multiplyer : 1;
+    let offset = params.offset ?? 0;
+    let multiplyer = params.multiplyer ?? 1;
 
     Draggable.create(targetId, {
       type: "rotation",
       bounds: {
-        minRotation: params.minRotation ? params.minRotation : 0,
-        maxRotation: params.maxRotation ? params.maxRotation : oneRotation,
+        minRotation: params.minRotation ?? 0,
+        maxRotation: params.maxRotation ?? oneRotation,
       },
       onDrag: function () {
         gsap.set(thisClass.fe, {
@@ -132,16 +132,16 @@ class Controller {
   }
   attrSlider(targetId, attribute, params) {
     let thisClass = this;
-    let offset = params.offset ? params.offset : 0;
-    let multiplyer = params.multiplyer ? params.multiplyer : 1;
-    let type = params.type ? params.type : "x";
+    let offset = params.offset ?? 0;
+    let multiplyer = params.multiplyer ?? 1;
+    let type = params.type ?? "x";
     Draggable.create(targetId, {
       type: type,
       bounds: {
-        top: params.max ? params.max : 0,
-        height: params.min ? params.min : 50,
-        left: params.min ? params.min : 0,
-        width: params.max ? params.max : 50,
+        top: params.max ?? 0,
+        height: params.min ?? 50,
+        left: params.min ?? 0,
+        width: params.max ?? 50,
       },
       onDrag: function () {
         gsap.set(thisClass.fe, {
@@ -208,6 +208,8 @@ class Morphology extends FilterElement {
     });
     g.appendChild(
       title(
+        {},
+        {},
         "Morphology: Drag the grey tab to increase growth; click to shrink instead"
       )
     );
@@ -273,6 +275,8 @@ class GaussianBlur extends FilterElement {
     });
     g.appendChild(
       title(
+        {},
+        {},
         "GaussianBlur: Drag the off-center lens to increase or decrease blurriness"
       )
     );
@@ -314,6 +318,7 @@ class GaussianBlur extends FilterElement {
 class DisplacementMap extends FilterElement {
   constructor(id, index) {
     super(id, index);
+    $(this.controller).addClass("in2");
     super.attrKnob(`.${this.controllerId}Scale`, "scale", {
       minRotation: -1 * oneRotation,
     });
@@ -330,6 +335,8 @@ class DisplacementMap extends FilterElement {
     let thisClass = this;
     g.appendChild(
       title(
+        {},
+        {},
         "DisplacementMap: Displaces a shape based on the colors plugged into it; press the buttons to change which color value used"
       )
     );
@@ -459,6 +466,7 @@ class Turbulence extends FilterElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "Turbulence: works best when plugged into a DisplacementMap; use the switch to change type and the tabs to change base frequency and the number of octaves"
       )
     );
@@ -578,6 +586,7 @@ class SpecularLighting extends LightingElement {
     });
     g.appendChild(
       title(
+        {},
         "SpecularLighting: Adds the shiny high-lights from a light source; must drag a bulb on top for it to work"
       )
     );
@@ -684,6 +693,7 @@ class DiffuseLighting extends LightingElement {
     });
     g.appendChild(
       title(
+        {},
         "DiffuseLighting: Adds the soft low-lights from a light source; must drag a bulb on top for it to work"
       )
     );
@@ -741,7 +751,6 @@ class Composite extends FilterElement {
     $("#" + this.triggerId + "OperatorSwitch")
       .unbind("click")
       .click((e) => {
-        console.log("cicked");
         this.changeOperator();
       });
   }
@@ -762,6 +771,7 @@ class Composite extends FilterElement {
     });
     g.appendChild(
       title(
+        {},
         "Composite: This determines how two colors behave when they overlap; click for different modes"
       )
     );
@@ -815,6 +825,7 @@ class Composite extends FilterElement {
 class Blend extends FilterElement {
   constructor(id, index) {
     super(id, index);
+    $(this.controller).addClass("in2");
     $("." + this.controllerId).click(() => {
       gsap.to(this.controller, { duration: dur, rotation: "+=22.5" });
       this.changeMode(this);
@@ -844,6 +855,7 @@ class Blend extends FilterElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "Blend: This determines how two colors behave when they overlap; click for different modes"
       )
     );
@@ -876,7 +888,7 @@ class Offset extends FilterElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
-    g.appendChild(title("Offset: This one just moves things"));
+    g.appendChild(title({}, "Offset: This one just moves things"));
     g.appendChild(
       rect({
         x: 2,
@@ -951,6 +963,7 @@ class ColorMatrix extends FilterElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "ColorMatrix: Press the circles to flip values, or press the switch to control saturation or hue with the dial in the top right"
       )
     );
@@ -1071,6 +1084,7 @@ class Flood extends FilterElement {
     });
     g.appendChild(
       title(
+        {},
         "Flood: Floods the entire space with a single color, works best when plugged into Composite or Blend"
       )
     );
@@ -1107,6 +1121,7 @@ class ComponentTransfer extends FilterElement {
     let dialW = 5;
     g.appendChild(
       title(
+        {},
         "ComponentTransfer: The switches on the left determine the mode for each color channel and the dials modify aspects depending on the mode"
       )
     );
@@ -1241,6 +1256,7 @@ class Image extends FilterElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "Image: This works best when plugged into any of the FilterElements with complicated sounding names (try plugging it into the displacement map). click for different images"
       )
     );
@@ -1295,6 +1311,7 @@ class Tile extends FilterElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "This one seems like it would be the simplest but I didnt get it to work yet"
       )
     );
@@ -1320,7 +1337,171 @@ class Tile extends FilterElement {
   }
 }
 
-class Merge extends FilterElement {}
+class Merge extends FilterElement {
+  constructor(id, index) {
+    super(id, index);
+    $(`.${this.controllerId}SourceSwitch`).click(() => {
+      this.flipSource();
+    });
+    $(`.${this.controllerId}NewNode`).click(() => {
+      this.newNode();
+    });
+    this.dragNode();
+  }
+  initVars() {
+    this.nodeCounter = 0;
+  }
+  initController(group, xPos, yPos) {
+    $(group).data("class", this);
+    // FIXME: This shouldnt be done this way
+    group = this.controllerAndNode;
+    $(group).data("class", this);
+    gsap.set(group, { x: gridWidth * xPos, y: gridHeight * yPos });
+    grid.appendChild(group);
+  }
+  createController() {
+    let controllerAndNodeGroup = group({ class: this.controllerId });
+    let g = group({ id: this.controllerId });
+    g.appendChild(
+      rect({
+        x: 10,
+        y: 10,
+        width: 30,
+        height: 30,
+        rx: 5,
+        ry: 5,
+        fill: "white",
+        class: this.triggerId,
+      })
+    );
+    g.appendChild(
+      rect({
+        x: 15,
+        y: 15,
+        width: 5,
+        height: 5,
+        fill: "black",
+        class: `${this.controllerId}SourceSwitch`,
+      })
+    );
+    g.appendChild(
+      circle({
+        cx: 25,
+        cy: 25,
+        r: 5,
+        fill: "black",
+        class: `${this.controllerId}NewNode`,
+      })
+    );
+    controllerAndNodeGroup.appendChild(g);
+    wireLayer.appendChild(
+      polyline({
+        id: this.controllerId + "Line",
+        points: "25,25 25,25 25,25 25,25",
+        strokeWidth: 5,
+        stroke: "black",
+        class: "wire merge",
+      })
+    );
+    controllerAndNodeGroup.appendChild(
+      circle({
+        cx: 25,
+        cy: 25,
+        r: 5,
+        fill: "turquoise",
+        class: `${this.controllerId}Node`,
+        id: `${this.controllerId}Node${this.nodeCounter}`,
+      })
+    );
+    this.nodeCounter++;
+    // FIXME: this shouldnt be done like this
+    this.controllerAndNode = controllerAndNodeGroup;
+    return g;
+  }
+  createFe() {
+    let fe = createSvgElement("feMerge", { id: this.id + "Fe" });
+    fe.appendChild(this.sourceNode());
+    return fe;
+  }
+  flipSource() {
+    let sourceNode = $(this.fe).find(".mergeNodeSource")[0];
+    sourceNode
+      ? $(sourceNode).remove()
+      : this.fe.appendChild(this.sourceNode());
+  }
+  sourceNode() {
+    return createSvgElement("feMergeNode", {
+      in: "SourceGraphic",
+      class: "mergeNodeSource",
+    });
+  }
+  newNode() {
+    this.controllerAndNode.appendChild(
+      circle({
+        cx: 25,
+        cy: 25,
+        r: 5,
+        fill: "turquoise",
+        class: `${this.controllerId}Node`,
+        id: `${this.controllerId}Node${this.nodeCounter}`,
+      })
+    );
+    this.dragNode();
+  }
+  getPreviousControllers() {
+    let controllers = [];
+    let currentElement = this;
+    while (currentElement.prev) {
+      currentElement = currentElement.prev;
+      if (controllers.indexOf(currentElement) == -1) {
+        controllers.push(currentElement.controller);
+      } else {
+        currentElement = null;
+      }
+    }
+    return controllers;
+  }
+  dragNode() {
+    let thisClass = this;
+    let validHit = false;
+    Draggable.create(`.${this.controllerId}Node`, {
+      type: "x,y",
+      bounds: grid,
+      snap: {
+        x: function (endValue) {
+          return Math.round(endValue / gridWidth) * gridWidth;
+        },
+        y: function (endValue) {
+          return Math.round(endValue / gridHeight) * gridHeight;
+        },
+      },
+      onDragEnd: function (e) {
+        let previousControllers = thisClass.getPreviousControllers();
+        let i = previousControllers.length;
+        while (--i > -1) {
+          if (this.hitTest(previousControllers[i])) {
+            thisClass.dropNode(this.target, previousControllers[i]);
+            validHit = true;
+          }
+        }
+        if (!validHit) thisClass.resetNode(this);
+      },
+    });
+  }
+  resetNode(e) {
+    gsap.to(e.target, { duration: dur, x: 0, y: 0 });
+  }
+  dropNode(mergeNode, targetEl) {
+    let targetClass = $(targetEl).data("class");
+    $(mergeNode).addClass(targetClass.controllerId);
+    targetClass.drag();
+    console.log(mergeNode);
+    console.log(targetEl);
+    this.fe.appendChild(
+      createSvgElement("feMergeNode", { in: targetClass.id })
+    );
+  }
+}
 //end of filter classes
 
 //sub filters - light source elements (lse)
@@ -1344,14 +1525,12 @@ class LightSourceElement extends Controller {
         let i = lightingElements.length;
         while (--i > -1) {
           let le = lightingElements[i];
-          if (this.hitTest(le) && !$(le).data("class").lse) {
+          if (this.hitTest(le, OVERLAP_THRESHOLD) && !$(le).data("class").lse) {
             thisClass.dropIntoLightSocket(this.target, le);
             validHit = true;
           }
         }
-        if (!validHit) {
-          thisClass.resetLse();
-        }
+        if (!validHit) thisClass.resetLse();
       },
     });
   }
@@ -1399,6 +1578,7 @@ class PointLight extends LightSourceElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "Spotlight: Drag onto 'SpecularLighting' or 'DiffuseLighting' for a nearby light source"
       )
     );
@@ -1436,6 +1616,7 @@ class DistantLight extends LightSourceElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "Spotlight: Drag onto 'SpecularLighting' or 'DiffuseLighting' for a far off light source. The crescent shapes can be dragged to change elevation and azimuth, whatever that is"
       )
     );
@@ -1486,6 +1667,7 @@ class SpotLight extends LightSourceElement {
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
       title(
+        {},
         "Spotlight: Drag onto 'SpecularLighting' or 'DiffuseLighting' for focused lighting"
       )
     );
@@ -1523,9 +1705,9 @@ class SpotLight extends LightSourceElement {
     });
   }
 }
-
 //end of light source elements
 
+//TODO: determine best patern of inheritance for connector, connector2 and merge
 class Connector extends Controller {
   constructor(id, index) {
     super(id, index);
@@ -1544,11 +1726,13 @@ class Connector extends Controller {
   }
 
   createController() {
+    // move to init vars?
     this.maleClasses = this.controllerId + "Head male connector";
     this.femaleClasses = this.controllerId + "Head female connector";
     let g = group();
     g.appendChild(
       title(
+        {},
         "Connector: Connect the pink end to a FilterElement and the blue end to a socket, or another FilterElement"
       )
     );
@@ -1623,14 +1807,13 @@ class Connector extends Controller {
     ) {
       this.resetConnector();
     } else {
-      if (female) {
-        this.input = feClass;
-      } else {
+      if (female) this.input = feClass;
+      else {
         feClass.prev = this.input;
         this.input.next = feClass;
-        if ($(filterElement).hasClass("in2")) {
-          gsap.set(feClass.fe, { attr: { in2: $(this.input).attr("id") } });
-        }
+        // if ($(filterElement).hasClass("in2")) {
+        //   gsap.set(feClass.fe, { attr: { in2: this.input.id } });
+        // }
         this.output = feClass;
       }
       $(connector).addClass(feClass.controllerId);
@@ -1682,6 +1865,104 @@ class Connector extends Controller {
   }
 }
 
+class Connector2 extends Connector {
+  constructor(id, index) {
+    super(id, index);
+  }
+  createController() {
+    this.maleClasses = this.controllerId + "Head male connector";
+    this.femaleClasses = this.controllerId + "Head female connector";
+    let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(
+      polyline({
+        points: "10,40 10,10 40,10",
+        fill: "pink",
+        id: `${this.controllerId}Female`,
+        class: this.femaleClasses,
+      })
+    );
+    //TODO: draw wire should be own function, its pretty much the same in the contreollers
+    wireLayer.appendChild(
+      polyline({
+        id: this.controllerId + "Line",
+        points: "25,25 25,25 25,25 25,25",
+        strokeWidth: 5,
+        stroke: "black",
+        class: "wire connector2",
+      })
+    );
+    g.appendChild(
+      polyline({
+        points: "10,40 40,10 40,40",
+        fill: "teal",
+        id: `${this.controllerId}Male`,
+        class: this.maleClasses,
+      })
+    );
+    return g;
+  }
+  connectFilterElement(connector, filterElement) {
+    let feClass = $(filterElement).data("class");
+    let female = $(connector).hasClass("female");
+    console.log(filterElement);
+    if (female) this.input = feClass;
+    else {
+      if (
+        this.isNext(this.input, feClass) &&
+        $(filterElement).hasClass("in2")
+      ) {
+        this.output = feClass;
+        console.log(this.output);
+        gsap.set(this.output.fe, {
+          attr: { in: feClass.prev.id, in2: this.input.id },
+        });
+      } else this.resetConnector();
+    }
+  }
+
+  resetConnector() {
+    let gChildren = this.controller.childNodes;
+    try {
+      gsap.set(this.output.fe, {
+        attr: {
+          in2: this.output.prev ? `#${this.output.prev.id}Fe` : "SourceGraphic",
+        },
+      });
+    } catch {}
+    $("#" + this.controllerId + "Female").attr("class", this.femaleClasses);
+    $("#" + this.controllerId + "Male").attr("class", this.maleClasses);
+    this.dragConnector();
+    this.input = null;
+    this.output = null;
+    //FIXME: this is probably not the right place for this function
+    updateAllFilters();
+
+    setTimeout(function () {
+      gChildren.forEach((child) => {
+        gsap.to(child, {
+          duration: dur,
+          x: 0,
+          y: 0,
+          attr: { points: "25,25 25,25 25,25 25,25" },
+        });
+      });
+    }, timeout);
+  }
+  // TODO: this function is similar to others. cycle though prev/next till element is found (returns false if hits null or hits the same element twice)
+  isNext(input, isNext) {
+    let dupArr = [input];
+    while (input && input.next) {
+      if (input.next == isNext) return true;
+      input = input.next;
+      if (dupArr.indexOf(input) == -1) dupArr.push(input);
+      else {
+        return false;
+      }
+    }
+    return false;
+  }
+}
+
 class FilterSocket extends Controller {
   constructor(id, index) {
     super(id, index);
@@ -1698,6 +1979,7 @@ class FilterSocket extends Controller {
     });
     g.appendChild(
       title(
+        {},
         "Socket: plug the blue end of a connector here in order to make a filter"
       )
     );
@@ -1771,6 +2053,13 @@ let controllerArr = [
     initY: 0,
   },
   {
+    name: "Connector2",
+    constructor: Connector2,
+    counter: 0,
+    initX: 12,
+    initY: 0,
+  },
+  {
     name: "Morphology",
     constructor: Morphology,
     counter: 0,
@@ -1812,6 +2101,7 @@ let controllerArr = [
     initX: 1,
     initY: 4,
   },
+  { name: "Merge", constructor: Merge, counter: 0, initX: 2, initY: 4 },
   { name: "Composite", constructor: Composite, counter: 0, initX: 0, initY: 2 },
   { name: "Blend", constructor: Blend, counter: 0, initX: 1, initY: 2 },
   { name: "Offset", constructor: Offset, counter: 0, initX: 2, initY: 1 },

@@ -1,0 +1,30 @@
+<svg width="200" height="200" viewBox="0 0 50 50">
+    <!-- <path stroke-linejoin="round" stroke="black" stroke-width="0.5" fill="none" -->
+    <!-- d="M21 8 A 5 5 0 1 1 29 8A 5 5 0 0 0 42 21 A 5 5 0 1 1 42 29 A 5 5 0 0 0 29 42 A 5 5 0 1 1 21 42 A 5 5 0 0 0 8 29 A 5 5 0 1 1 8 21 A 5 5 0 0 0 21 8z" /> -->
+    <!-- <path stroke-linejoin="round" stroke="black" stroke-width="0.5" fill="none" d="M 22 18 A 9 9 0 1 1 28 18 A 3 3 0 1 0 32 22 A 9 9 0 1 1 32 28 A 3 3 0 1 0 28, 32 A 9 9 0 1 1 22 32 A 3 3 0 1 0 18,28 A 9 9 0 1 1 18 22 A 3 3 0 1 0 22 18 z"/> -->
+    <!-- <path stroke-linejoin="round" stroke="black" stroke-width="0.5" fill="none" d="M 22 13 A 9 9 225 1 1 28 13 A 9 9 180 0 0 37 22 A 9 9 135 1 1 37 28 A 9 9 0 0 0 28, 37 A 9 9 0 1 1 22 37 A 9 9 0 0 0 13,28 A 9 9 0 1 1 13 22 A 9 9 0 0 0 22 13 z"/> -->
+
+    <!-- These 2 look good together -->
+    <path stroke="black" stroke-width="0.5" fill="white" d="M 15 10 a 10 10 0 1 1 20 0 a 10 10 0 1 0 5 5 a 10 10 0 1 1 0 20 a 10 10 0 1 0 -5 5 a 10 10 0 1 1 -20 0 a 10 10 0 1 0 -5 -5 a 10 10 0 1 1 0 -20 a 10 10 0 1 0 5 -5 z"/>
+    <path stroke-linejoin="round" stroke="black" stroke-width="1" fill="none"
+        d="M 21 13 A 5 5 0 1 1 29 13 A 5 5 0 0 0 37 21 A 5 5 0 1 1 37 29 A 5 5 0 0 0 29 37 A 5 5 0 1 1 21 37 A 5 5 0 0 0 13 29 A 5 5 0 1 1 13 21 A 5 5 0 0 0 21 13 z" />
+    <!-- These 2 look good together -->
+
+
+
+    <!-- <path stroke="black" stroke-width="0.5" fill="white" d="M 15 10 a 10 10 0 1 1 20 0 a 10 10 0 1 0 5 5 a 10 10 0 1 1 0 20 a 10 10 0 1 0 -5 5 a 10 10 0 1 1 -20 0 a 10 10 0 1 0 -5 -5 a 10 10 0 1 1 0 -20 a 10 10 0 1 0 5 -5 z M 21 13 A 5 5 0 1 1 29 13 A 5 5 0 0 0 37 21 A 5 5 0 1 1 37 29 A 5 5 0 0 0 29 37 A 5 5 0 1 1 21 37 A 5 5 0 0 0 13 29 A 5 5 0 1 1 13 21 A 5 5 0 0 0 21 13 z"/> -->
+
+
+<!-- 
+    <path stroke-linejoin="round" stroke="white" stroke-width="1" fill="none"
+        d="M 21 18 A 3 3 0 1 1 29 18 A 3 3 0 0 0 32 21 A 3 3 0 1 1 32 29 A 3 3 0 0 0 29 32 A 3 3 0 1 1 21 32 A 3 3 0 0 0 18 29 A 3 3 0 1 1 18 21 A 3 3 0 0 0 21 18 z" />
+ -->
+
+    <!-- circles -->
+<!-- 
+    <path id="Imported Path" fill="none" stroke="black" stroke-width="1"
+        d="M 37 25 C 37 31.6 31.6 37 25 37 C 18.4 37 13 31.6 13 25 C 13 18.4 18.4 13 25 13 C 25 13 37 13 37 25 Z" />
+    <path id="Imported Path" fill="none" stroke="black" stroke-width="1"
+        d="M 40 25 C 40 33.3 33.3 40 25 40 C 16.7 40 10 33.3 10 25 C 10 16.7 16.7 10 25 10 C 25 10 40 10 40 25 Z" /> -->
+
+</svg>
