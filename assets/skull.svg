@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 
 <svg id="svgSkull" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2000 2000">
-   <path id="skull" fill="none" stroke="black" stroke-width="1" d="M 1014.00,87.00
+   <path id="skull" class="svgMainShape" fill="none" stroke="black" stroke-width="1" d="M 1014.00,87.00
            C 1017.00,87.00 1326.00,175.50 1326.00,175.50
              1326.00,175.50 1442.50,446.50 1441.50,445.50
              1440.50,444.50 1219.00,685.00 1221.00,685.00
@@ -66,7 +66,7 @@
              896.50,421.50 851.00,471.00 851.00,471.00
              872.00,490.00 848.50,525.00 824.50,499.50
              824.50,499.50 760.00,510.50 758.00,510.50 Z" />
-   <path id="jaw" fill="none" stroke="black" stroke-width="1" d="M 310.00,1122.00
+   <path id="jaw" class="svgMainShape" fill="none" stroke="black" stroke-width="1" d="M 310.00,1122.00
            C 310.00,1122.00 417.00,970.00 417.00,970.00
              417.00,970.00 519.00,1057.00 519.00,1057.00
              519.00,1057.00 499.00,1237.00 499.00,1237.00

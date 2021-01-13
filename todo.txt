@@ -1,3 +1,88 @@
+ tutorial
+ -show filter socket only
+ ->click to change fill 
+ -show new gaussianBlur button
+->click new gaussian blur get new blur
+-add new connector (but not button for more)
+tell them to put female on blur
+-> female on blur
+tell them to male on socket
+->male to socket
+move pupil
+->changes bluriness
+-new morphology button
+-> click for new morphology
+tell them to click wire to remove connection
+-> connection removed
+connect female to morphology male to socket
+-> female connected to morphology male to socket
+change radius
+-> radius changed
+change type
+->type changed
+-new connector button
+make a new connector and plug the female to blur male to morphology
+-> all wired up blur-morph-socket
+fuck around
+->blur changed
+
+-remove all filter elements
+-add buttonfor specular lighting
+->specular lighitng controller added
+connect it to the socket
+->lse connected to socket
+Oh no whered it go? lighting elements need light sources to work
+-throw up all 3 lse
+select one and drag it ont the the thing
+->lse added to light element
+you can  fuck around with the levels or drag a different light source over it to swap it
+->check levels fucked with or lse changed
+this is showing us the lighting but not the sourcegraphic, one way to show the source graphic with the lighting effect over it is
+with the blend element
+-show new button for blend
+->button clicked
+the lighting needs to be plugged into composite, unplug specular lighting from socket
+-> specular unplugged
+plug specular into blend and blend into the socket
+->all 3 in line
+change the blend mode by clicking it
+-> blend mode clicked a few times
+composite works in a similar fashion
+- generate new composite button and a composite controller
+likewise specular lighting has a counterpart called diffuse lighting. where specular lighting shows the shiney hilights diffuse lighting
+shows the soft lo lights
+click next when ready to continue or fuck around
+-> next clicked
+
+- show new turbulence button
+turbulence generates visual noise, plug it into the socket
+-> turbulence plugged in
+on its own it overwrites source graphic with noise
+-new displacement map button
+->displcement map button clicked
+the displacement map will change the shape of an image based on inputs, use the turbulence as an input
+->turbulence to dispmap to socket
+-new image button and image controller
+image behaves similar to turbulence except it applies an image instead of noise, plug the image directly into the socket to see what it looks like
+then plug it into the displacement map to see how it changes the shape of the sourcegraphic times
+-> image to disp to socket
+great now lets combine some stuff, unplug the displacement map from the socket and plug it into a lighting element instead, with a light source, of course (use the soptlight for this demonstration, it will make things a bit clearer), then plug said lighting element
+into  blend, then plug it into the socket
+->image/turb - disp map - lightingelement(make sure it has a light) - blend/composite - socket
+great now you can mess around with the settings, but theres a second ype of connector  to look at. connector 2
+this connector is only for elements that can take more than one input. these are blend, composite and displcement map.
+you can use any element as an input but the male end must be plugged into one of the three elements stated AND, that element must be "Downstream" of the input element
+meaining, the elements must already be connected directly or indirectly with a regular connector and the COMPOSITE, BLEND, OR Dsiplacement map that we are pluggin the male end into must be later in the chain 
+-> next clicked or they actually manage to get this part somehow
+
+finally merge 
+then show all the other undemonstrated components, color matrix, offset, etc
+
+ 
+ 
+ redesign connector
+
+
  really inconsitent use of jquery and vanilla js try to determine where and when to use what
     - document.getelemnt/class vs $(.)
     - forEach vs .each
@@ -7,11 +92,6 @@
 fix connector line
 
 morphology is very laggy, truncate values????
-
-!!!
-nextEnum should be replace with a function that gets the indexOf the current blah blah
-you shoudl remove this.controllerspecificindex and rename the arrays,
-!!!
 
 look into why compoite (and maybe others) are double clicking
 
@@ -47,7 +127,5 @@ change all string manipulation to string interpolation rather than string concat
 
  the filters
 
-NOIN            <li id="liMerge" class="liFe">Merge</li>
-in mergeNode
-in            <li id="liConvolutionMatrix" class="liFe">Convolve</li>
-in                        <li id="liTile" class="liFe">Tile</li>???????????????????????????
+convolveMatrix
+Tile

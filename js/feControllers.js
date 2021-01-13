@@ -1525,7 +1525,7 @@ class LightSourceElement extends Controller {
         let i = lightingElements.length;
         while (--i > -1) {
           let le = lightingElements[i];
-          if (this.hitTest(le, OVERLAP_THRESHOLD) && !$(le).data("class").lse) {
+          if (this.hitTest(le, OVERLAP_THRESHOLD)) {
             thisClass.dropIntoLightSocket(this.target, le);
             validHit = true;
           }
@@ -1544,6 +1544,9 @@ class LightSourceElement extends Controller {
   dropIntoLightSocket(lse, lightElement) {
     let lseClass = $(lse).data("class");
     let lightElementClass = $(lightElement).data("class");
+    if (lightElementClass.lse){
+      lightElementClass.lse.resetLse();
+    }
     $(lse).addClass(lightElementClass.controllerId);
     lightElementClass.drag();
     lseClass.attrDrag();
@@ -1559,6 +1562,8 @@ class LightSourceElement extends Controller {
   }
   resetLse() {
     this.fe.remove();
+    //TODO: this class string should come from a class value, same with the createController class strings
+    this.controller.classList = this.controllerId
     this.drag();
     setTimeout(() => {
       gsap.to(this.controller, {
