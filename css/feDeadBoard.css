@@ -367,10 +367,10 @@ foreignObject {
     height    : 5%;
     fill      : rgba(138, 184, 236, 0.8);
     visibility: collapse;
+    position: fixed;
+    right   : 5%;
 }
 
 #nextTutorialButton {
-    position: fixed;
-    right   : 5%;
     bottom  : 0;
 }

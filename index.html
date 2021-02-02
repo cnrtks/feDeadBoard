@@ -20,6 +20,7 @@
                 <g id="controllerDiffuseLightingContainer"></g>
                 <g id="controllerColorMatrixContainer"></g>
                 <g id="controllerFloodContainer"></g>
+                <g id="controllerMergeContainer"></g>
 
                 <g id="connectorContainer"></g>
                 <g id="compositeOperatorContainer"></g>
@@ -47,9 +48,12 @@
         <g id="filterControllerLayer"></g>
         <g id="lseLayer"></g>
     </svg>
-    <button class="tutorialButtons" id="nextTutorialButton">
+    <div id="tutorialMenuDiv" class="tutorialButtons">
+    <button id="nextTutorialButton">
         Next Tutorial
     </button>
+    <button id="showLastPromptButton" onclick="Tutorial.showLastPrompt()">Show Last Prompt</button>
+</div>
    <div id="dialogBox"><span id="dialogText"></span><span id="dialogClose" onclick="Tutorial.hideDialog()">I got it</span></div>
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/gsap-shockingly-green/umd/gsap.js"></script>

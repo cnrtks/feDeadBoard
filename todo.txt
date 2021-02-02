@@ -80,10 +80,7 @@ then show all the other undemonstrated components, color matrix, offset, etc
 
  
  
- redesign connector
- update wires on resetConnector
- update wires on controller move
-fix wire alignment
+change wires to class property and give them their own generateWireFunction
 
 
  really inconsitent use of jquery and vanilla js try to determine where and when to use what

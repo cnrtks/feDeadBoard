@@ -75,9 +75,9 @@ nextArrayElement = function (arr, el) {
 };
 
 class Controller {
-  constructor(id, index) {
+  constructor(id, index, initVars) {
     this.id = id;
-    this.initVars();
+    this.initVars(initVars);
     this.controllerId = this.id + "Controller";
     this.triggerId = this.id + "Trigger";
     this.initX = controllerArr[index].initX;
@@ -243,7 +243,6 @@ class Morphology extends FilterElement {
     });
     g.appendChild(
       title(
-        {},
         {},
         "Morphology: Drag the grey tab to increase growth; click to shrink instead"
       )
@@ -1335,7 +1334,7 @@ class Image extends FilterElement {
     });
   }
 }
-
+//TODO:this one seems like it would be the simplest yet here we are
 class Tile extends FilterElement {
   constructor(id, index) {
     super(id, index);
@@ -1369,7 +1368,9 @@ class Tile extends FilterElement {
     });
   }
 }
-
+//TODO: you missed this one
+class DropShadow extends FilterElement {}
+//FIXME: this ones the glitchinest
 class Merge extends FilterElement {
   constructor(id, index) {
     super(id, index);
@@ -1379,23 +1380,17 @@ class Merge extends FilterElement {
     $(`.${this.controllerId}NewNode`).click(() => {
       this.newNode();
     });
-    this.dragNode();
   }
   initVars() {
     this.nodes = [];
     this.nodeCounter = 0;
   }
-
   createController() {
-    let g = group({ id: this.controllerId });
+    let g = group({ id: this.controllerId, class: this.controllerId });
+    g.appendChild(title({},"This is a Merge controller. It allows filters to be applied in tandem rather than in sequence. Click the center to generate a node and attach the node to any filter element upstream from the 'Merge Controller'."))
     g.appendChild(
-      rect({
-        x: 10,
-        y: 10,
-        width: 30,
-        height: 30,
-        rx: 5,
-        ry: 5,
+      path({
+        d: $("#mergeMain").attr("d"),
         fill: "white",
         class: this.triggerId,
       })
@@ -1439,7 +1434,17 @@ class Merge extends FilterElement {
     });
   }
   newNode() {
-    return MergeNode(this.id + "Node" + this.nodeCounter, 8);
+    let newNode = new MergeNode(this.id + "Node" + this.nodeCounter, 8, {
+      parent: this,
+    });
+    this.nodeCounter++;
+    this.nodes.push(newNode);
+    this.wires.push(newNode);
+    gsap.set(newNode.controller, {
+      x: `${gsap.getProperty(this.controller, "x")}`,
+      y: `${gsap.getProperty(this.controller, "y")}`,
+    });
+    this.drag();
   }
   getPreviousControllers() {
     let controllers = [];
@@ -1453,6 +1458,13 @@ class Merge extends FilterElement {
       }
     }
     return controllers;
+  }
+  reDrawPolyline() {
+    // TODO:put in exception handling for arrays that iterate through other arrays
+    // this could cause an infinite loop if you are not careful
+    this.nodes.forEach((n) => {
+      n.reDrawPolyline;
+    });
   }
 }
 //end of filter classes
@@ -1530,7 +1542,6 @@ class LightSourceElement extends Controller {
     }, timeout);
   }
 }
-
 class PointLight extends LightSourceElement {
   constructor(id, index) {
     super(id, index);
@@ -1565,7 +1576,6 @@ class PointLight extends LightSourceElement {
     });
   }
 }
-
 class DistantLight extends LightSourceElement {
   constructor(id, index) {
     super(id, index);
@@ -1619,7 +1629,6 @@ class DistantLight extends LightSourceElement {
     });
   }
 }
-
 class SpotLight extends LightSourceElement {
   constructor(id, index) {
     super(id, index);
@@ -1667,34 +1676,87 @@ class SpotLight extends LightSourceElement {
   }
 }
 class MergeNode extends Controller {
-  constructor(id, index) {
-    super(id, index);
-    this.fe = creatFe();
+  constructor(id, index, initVars) {
+    super(id, index, initVars);
+    this.fe = this.createFe();
     this.dragNode();
-  }
-  createController() {
-    return circle({
-      cx: 25,
-      cy: 25,
-      r: 5,
-      fill: "turquoise",
+    this.in = null;
+    $(`#${this.controllerId}Line`).click(() => {
+      this.deleteNode();
     });
   }
-  resetNode(e) {
-    gsap.to(e.target, { duration: dur, x: 0, y: 0 });
+  createController() {
+    let g = group({ id: this.controllerId, class: this.parent.controllerId });
+    g.appendChild(
+      circle({
+        cx: 25,
+        cy: 25,
+        r: 8,
+        fill: "turquoise",
+        class: `${this.controllerId}Head`,
+      })
+    );
+    wireLayer.appendChild(
+      polyline({
+        id: this.controllerId + "Line",
+        points: "25,25 25,25 25,25 25,25",
+        strokeWidth: 5,
+        stroke: "black",
+        class: "wire merge",
+      })
+    );
+    return g;
+  }
+  createFe() {
+    return createSvgElement("feMergeNode");
+  }
+  toDOM() {
+    lseLayer.appendChild(this.controller);
+  }
+  initVars(initVars) {
+    this.parent = initVars.parent;
+  }
+  resetNode() {
+    if (this.in) this.in.wires.splice(this.in.wires.indexOf(this), 1);
+    this.parent.fe.remove(this.fe);
+    this.in = null;
+    let tlReset = gsap.timeline({
+      onComplete: () => {
+        this.reDrawPolyline();
+      },
+    });
+    tlReset.to(this.controller, {
+      duration: dur,
+      x:
+      this.initX * gridHeight + gsap.getProperty(this.parent.controller, "x"),
+      y: this.initY * gridWidth + gsap.getProperty(this.parent.controller, "y") ,
+      opacity: 1,
+    });
+    this.dragNode();
+  }
+  deleteNode() {
+    if (this.in) this.in.wires.splice(this.in.wires.indexOf(this), 1);
+    this.parent.fe.remove(this.fe);
+    this.in = null;
+    this.controller.remove();
+    document.getElementById(`${this.controllerId}Line`).remove();
   }
   dropNode(mergeNode, targetEl) {
     let targetClass = $(targetEl).data("class");
+    this.in = targetClass;
     $(mergeNode).addClass(targetClass.controllerId);
+    $(mergeNode).removeClass(this.controller);
     targetClass.drag();
-    this.fe.appendChild(
-      createSvgElement("feMergeNode", { in: targetClass.id })
-    );
+    targetClass.wires.push(this);
+    this.fe.setAttribute("in", targetClass.id);
+    this.parent.fe.appendChild(this.fe);
+    gsap.set(this.controller, { opacity: 0 });
+    this.reDrawPolyline();
   }
   dragNode() {
     let thisClass = this;
     let validHit = false;
-    Draggable.create(`.${this.controllerId}Node`, {
+    Draggable.create(`.${this.controllerId}Head`, {
       type: "x,y",
       bounds: grid,
       snap: {
@@ -1706,7 +1768,7 @@ class MergeNode extends Controller {
         },
       },
       onDragEnd: function (e) {
-        let previousControllers = thisClass.getPreviousControllers();
+        let previousControllers = thisClass.parent.getPreviousControllers();
         let i = previousControllers.length;
         while (--i > -1) {
           if (this.hitTest(previousControllers[i])) {
@@ -1714,9 +1776,23 @@ class MergeNode extends Controller {
             validHit = true;
           }
         }
-        if (!validHit) thisClass.resetNode(this);
+        if (!validHit) thisClass.resetNode();
       },
     });
+  }
+  reDrawPolyline() {
+    let n = this.in ? this.in.controller : this.parent.controller;
+    let cxn = Math.trunc(gridWidth / 2 + gsap.getProperty(n, "x"));
+    let cyn = Math.trunc(gridHeight / 2 + gsap.getProperty(n, "y"));
+    let cxm = Math.trunc(
+      gridWidth / 2 + gsap.getProperty(this.parent.controller, "x")
+    );
+    let cym = Math.trunc(
+      gridHeight / 2 + gsap.getProperty(this.parent.controller, "y")
+    );
+    let x2 = (cxm + cxn) / 2;
+    let points = `${cxn},${cyn} ${x2},${cyn} ${x2},${cym} ${cxm},${cym}`;
+    gsap.to(`#${this.controllerId}Line`, { attr: { points: points } });
   }
 }
 //end of sub filters - light source elements and mergeNodes
@@ -1838,12 +1914,8 @@ class Connector extends Controller {
   resetConnector() {
     let gChildren = this.controller.childNodes;
     let thisClass = this;
-    try {
-      this.input.next = null;
-    } catch {}
-    try {
-      this.output.prev = null;
-    } catch {}
+    if (this.input) this.input.next = null;
+    if (this.output) this.output.prev = null;
     try {
       this.output.wires.splice(this.output.wires.indexOf(this), 1);
     } catch {}
@@ -2206,6 +2278,10 @@ importExternalSvg = function () {
       path: "/assets/controllers/controllerFlood.svg",
     },
     {
+      container: "#controllerMergeContainer",
+      path: "/assets/controllers/controllerMerge.svg",
+    },
+    {
       container: "#connectorContainer",
       path: "/assets/controllers/connector.svg",
     },
@@ -2300,7 +2376,7 @@ const Tutorial = {
     gsap.set(".tutorialButtons", { visibility: "visible" });
     Tutorial.resetTutorial();
     Tutorial.showDialog(
-      "This is an interactive demonstration of SVG filters. Take notice of the large skull in the center of the window and of the small square socket to the right of it. The filter will affect the skull, the socket will be use to input filter elements.",
+      "This is an interactive demonstration of SVG filters. Take notice of the large skull in the center of the window and of the small square socket to the right of it. The filter will affect the skull, the socket will be used to input filter elements.",
       () => {
         let newBlurButton = generateNewControllerButton(3);
         let blurCreatedEvent = newBlurButton.addEventListener(
@@ -2340,7 +2416,7 @@ const Tutorial = {
           ) {
             clearInterval(filterCheckInterval);
             Tutorial.showDialog(
-              "Let's introduce a new 'Filter Element Controller'",
+              "Remeber to always Connect the female end first. Now let's introduce a new 'Filter Element Controller'",
               () => {
                 generateNewControllerButton(2);
                 generateController(2);
@@ -2503,7 +2579,7 @@ const Tutorial = {
                               ) {
                                 clearInterval(filterCheckInterval);
                                 setTimeout(() => {
-                                  generateController(11),
+                                  generateController(9),
                                     Tutorial.tutCompositeCreated();
                                 }, longTimeout);
                               }
@@ -2568,7 +2644,6 @@ const Tutorial = {
                                     filterCheckInterval = setInterval(() => {
                                       filterChildren =
                                         Tutorial.filterSocket.filter.childNodes;
-                                      console.log(filterChildren[1].tagName);
                                       if (
                                         filterChildren.length === 3 &&
                                         filterChildren[1].tagName ===
@@ -2661,9 +2736,13 @@ const Tutorial = {
   },
   //fourth phase of tutorial
   tutMerge: () => {
+    Tutorial.showDialog("Congratualtions on completing the tutorial, there are a few more filter elements to play around with and much to learn that was not covered in the tutorial")
     nextTutorialButton.onclick = Tutorial.endTutorial;
   },
-  endTutorial: () => {},
+  endTutorial: () => {
+    Tutorial.resetTutorial();
+    noTutorial();
+  },
   resetTutorial: () => {
     clearInterval(1);
     layersToReset.forEach((layer) => {
@@ -2686,6 +2765,10 @@ const Tutorial = {
     hide.set(dialogBox, { visibility: "hidden" });
     setTimeout(callback, timeout);
   },
+  showLastPrompt: ()=>{
+    gsap.set(dialogBox, { visibility: "visible" });
+    gsap.to(dialogBox, { duration: dur, opacity: 1 });
+  }
 };
 
 tutorialPrompt = function () {
