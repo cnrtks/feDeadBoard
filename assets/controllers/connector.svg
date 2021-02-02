@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 
-<svg id="connectorSvg" xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 50 50">
-   <path id="connectorMale" fill="skyblue" stroke="black" stroke-width="1"
-      d="M25,25 L40,25 L25,35 M20,15 L 35,25 L 20,35" />
-   <path id="connectorFemale" fill="pink" stroke="black" stroke-width="1" d="M 20 15 L 35 25 L 20 35
-      M 20 15 A 10 10 0 1 1 20 35
-      M35,25 h5 " />
-   <!-- <path id="connectorMale" fill="skyblue" stroke="black" stroke-width="1" transform="translate(-5)"
-      d="M25,25 L10,25 L25,35 M30,15 L 15,25 L 30,35" />
-   <path id="connectorFemale" fill="pink" stroke="black" stroke-width="1" transform="translate(5)" d="M 20 15 L 35 25 L 20 35
-      M 20 15 A 10 10 0 1 1 20 35
-      M35,25 h5 " /> -->
+<svg id="connectorSvg" xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+    <path id="connectorMale" fill="none" stroke="black" stroke-width="1" d="M 30.01,30.01
+           C 30.01,30.01 45.92,45.92 45.92,45.92
+             45.92,45.92 19.40,40.62 19.40,40.62M 35.31,14.10
+           C 35.31,14.10 40.62,40.62 40.62,40.62
+             40.62,40.62 14.10,35.31 14.10,35.31" />
+    <path id="connectorFemale" fill="none" stroke="black" stroke-width="1" d="M 14.69,35.90
+           C 14.69,35.90 9.38,9.38 9.38,9.38
+             9.38,9.38 35.90,14.69 35.90,14.69M 14.69,35.90
+           C 8.83,30.04 8.83,20.55 14.69,14.69
+             20.55,8.83 30.04,8.83 35.90,14.69M 9.38,9.38
+           C 9.38,9.38 4.08,4.08 4.08,4.08" />
 </svg>

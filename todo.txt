@@ -30,7 +30,7 @@ fuck around
 -add buttonfor specular lighting
 ->specular lighitng controller added
 connect it to the socket
-->lse connected to socket
+->light el connected to socket
 Oh no whered it go? lighting elements need light sources to work
 -throw up all 3 lse
 select one and drag it ont the the thing
@@ -81,6 +81,9 @@ then show all the other undemonstrated components, color matrix, offset, etc
  
  
  redesign connector
+ update wires on resetConnector
+ update wires on controller move
+fix wire alignment
 
 
  really inconsitent use of jquery and vanilla js try to determine where and when to use what

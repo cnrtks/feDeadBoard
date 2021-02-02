@@ -1,5 +1,7 @@
 const dur = 0.3;
 const timeout = 500;
+const longTimeout = timeout * 10;
+const interval = 250;
 const oneRotation = 360;
 const morphRadiusRatio = 5;
 const TRANSFORM_ORIGIN = "transform-origin";
@@ -9,6 +11,8 @@ const FLOOD_OPACITY = "flood-opacity";
 const CLIP_PATH = "clip-path";
 const OVERLAP_THRESHOLD = "20%";
 
+const viewBoxWidth = 700;
+const viewBoxHeight = 350;
 const gridWidth = 50;
 const gridHeight = 50;
 const controllerCenter = 25;
@@ -27,13 +31,32 @@ let gridRows = 7,
   y;
 const grid = document.getElementById("deadBoard");
 const wireLayer = document.getElementById("wireLayer");
+const buttonLayer = document.getElementById("newControllerButtonLayer");
+const connectorLayer = document.getElementById("connectorLayer");
+const socketLayer = document.getElementById("socketLayer");
+const controllerLayer = document.getElementById("filterControllerLayer");
+const lseLayer = document.getElementById("lseLayer");
+const layersToReset = [
+  wireLayer,
+  buttonLayer,
+  connectorLayer,
+  controllerLayer,
+  lseLayer,
+];
+
 const filterDefs = document.getElementById("filterDefs");
+
+const dialogBox = document.getElementById("dialogBox");
+const dialogText = document.getElementById("dialogText");
+const dialogClose = document.getElementById("dialogClose");
+
+const nextTutorialButton = document.getElementById("nextTutorialButton");
 
 //FIXME: should be in lib
 getCssVar = function (value) {
   return window.getComputedStyle(document.body).getPropertyValue(value).trim();
 };
-
+//FIXME: should be in lib
 randomColor = function () {
   colors = [
     "--R",
@@ -46,7 +69,7 @@ randomColor = function () {
   ];
   return getCssVar(gsap.utils.random(colors));
 };
-
+//FIXME: should be in lib
 nextArrayElement = function (arr, el) {
   return gsap.utils.wrap(arr, arr.indexOf(el) + 1);
 };
@@ -62,12 +85,16 @@ class Controller {
     this.controllerArrayIndex = index;
     this.controller = this.createController();
     $(this.controller).addClass("controller");
+    // FIXME: figure out why your passing some stuff in as params but not consistently
     this.initController(this.controller, this.initX, this.initY);
+    this.toDOM();
   }
   initController(group, xPos, yPos) {
     $(group).data("class", this);
     gsap.set(group, { x: gridWidth * xPos, y: gridHeight * yPos });
-    grid.appendChild(group);
+  }
+  toDOM() {
+    console.log(this);
   }
   resetController() {
     setTimeout(() => {
@@ -107,6 +134,11 @@ class Controller {
             thisClass.resetController();
           }
         }
+        setTimeout(() => {
+          thisClass.wires.forEach((w) => {
+            w.reDrawPolyline();
+          });
+        }, timeout);
       },
     });
   }
@@ -185,6 +217,9 @@ class FilterElement extends Controller {
     this.next = null;
     this.wires = [];
     this.drag();
+  }
+  toDOM() {
+    controllerLayer.appendChild(this.controller);
   }
   drag() {
     super.dragController("." + this.controllerId, "." + this.triggerId);
@@ -748,11 +783,9 @@ class Composite extends FilterElement {
   constructor(id, index) {
     super(id, index);
     $(this.controller).addClass("in2");
-    $("#" + this.triggerId + "OperatorSwitch")
-      .unbind("click")
-      .click((e) => {
-        this.changeOperator();
-      });
+    $("#" + this.triggerId + "OperatorSwitch").click(() => {
+      this.changeOperator();
+    });
   }
   initVars() {
     this.filterSpecificEnum = [
@@ -1242,7 +1275,7 @@ class ComponentTransfer extends FilterElement {
     });
   }
 }
-
+// TODO: figure out what the hell this is and how to make a controller for it
 class ConvolveMatrix extends FilterElement {}
 
 class Image extends FilterElement {
@@ -1349,18 +1382,11 @@ class Merge extends FilterElement {
     this.dragNode();
   }
   initVars() {
+    this.nodes = [];
     this.nodeCounter = 0;
   }
-  initController(group, xPos, yPos) {
-    $(group).data("class", this);
-    // FIXME: This shouldnt be done this way
-    group = this.controllerAndNode;
-    $(group).data("class", this);
-    gsap.set(group, { x: gridWidth * xPos, y: gridHeight * yPos });
-    grid.appendChild(group);
-  }
+
   createController() {
-    let controllerAndNodeGroup = group({ class: this.controllerId });
     let g = group({ id: this.controllerId });
     g.appendChild(
       rect({
@@ -1393,29 +1419,6 @@ class Merge extends FilterElement {
         class: `${this.controllerId}NewNode`,
       })
     );
-    controllerAndNodeGroup.appendChild(g);
-    wireLayer.appendChild(
-      polyline({
-        id: this.controllerId + "Line",
-        points: "25,25 25,25 25,25 25,25",
-        strokeWidth: 5,
-        stroke: "black",
-        class: "wire merge",
-      })
-    );
-    controllerAndNodeGroup.appendChild(
-      circle({
-        cx: 25,
-        cy: 25,
-        r: 5,
-        fill: "turquoise",
-        class: `${this.controllerId}Node`,
-        id: `${this.controllerId}Node${this.nodeCounter}`,
-      })
-    );
-    this.nodeCounter++;
-    // FIXME: this shouldnt be done like this
-    this.controllerAndNode = controllerAndNodeGroup;
     return g;
   }
   createFe() {
@@ -1436,17 +1439,7 @@ class Merge extends FilterElement {
     });
   }
   newNode() {
-    this.controllerAndNode.appendChild(
-      circle({
-        cx: 25,
-        cy: 25,
-        r: 5,
-        fill: "turquoise",
-        class: `${this.controllerId}Node`,
-        id: `${this.controllerId}Node${this.nodeCounter}`,
-      })
-    );
-    this.dragNode();
+    return MergeNode(this.id + "Node" + this.nodeCounter, 8);
   }
   getPreviousControllers() {
     let controllers = [];
@@ -1461,55 +1454,18 @@ class Merge extends FilterElement {
     }
     return controllers;
   }
-  dragNode() {
-    let thisClass = this;
-    let validHit = false;
-    Draggable.create(`.${this.controllerId}Node`, {
-      type: "x,y",
-      bounds: grid,
-      snap: {
-        x: function (endValue) {
-          return Math.round(endValue / gridWidth) * gridWidth;
-        },
-        y: function (endValue) {
-          return Math.round(endValue / gridHeight) * gridHeight;
-        },
-      },
-      onDragEnd: function (e) {
-        let previousControllers = thisClass.getPreviousControllers();
-        let i = previousControllers.length;
-        while (--i > -1) {
-          if (this.hitTest(previousControllers[i])) {
-            thisClass.dropNode(this.target, previousControllers[i]);
-            validHit = true;
-          }
-        }
-        if (!validHit) thisClass.resetNode(this);
-      },
-    });
-  }
-  resetNode(e) {
-    gsap.to(e.target, { duration: dur, x: 0, y: 0 });
-  }
-  dropNode(mergeNode, targetEl) {
-    let targetClass = $(targetEl).data("class");
-    $(mergeNode).addClass(targetClass.controllerId);
-    targetClass.drag();
-    console.log(mergeNode);
-    console.log(targetEl);
-    this.fe.appendChild(
-      createSvgElement("feMergeNode", { in: targetClass.id })
-    );
-  }
 }
 //end of filter classes
 
-//sub filters - light source elements (lse)
+//sub filters - light source elements (lse) and merge nodes
 class LightSourceElement extends Controller {
   constructor(id, index) {
     super(id, index);
     this.fe = this.createFe();
     this.drag();
+  }
+  toDOM() {
+    lseLayer.appendChild(this.controller);
   }
   dragLse(targetId, triggerId) {
     let thisClass = this;
@@ -1544,7 +1500,7 @@ class LightSourceElement extends Controller {
   dropIntoLightSocket(lse, lightElement) {
     let lseClass = $(lse).data("class");
     let lightElementClass = $(lightElement).data("class");
-    if (lightElementClass.lse){
+    if (lightElementClass.lse) {
       lightElementClass.lse.resetLse();
     }
     $(lse).addClass(lightElementClass.controllerId);
@@ -1563,7 +1519,7 @@ class LightSourceElement extends Controller {
   resetLse() {
     this.fe.remove();
     //TODO: this class string should come from a class value, same with the createController class strings
-    this.controller.classList = this.controllerId
+    this.controller.classList = this.controllerId;
     this.drag();
     setTimeout(() => {
       gsap.to(this.controller, {
@@ -1710,9 +1666,63 @@ class SpotLight extends LightSourceElement {
     });
   }
 }
-//end of light source elements
+class MergeNode extends Controller {
+  constructor(id, index) {
+    super(id, index);
+    this.fe = creatFe();
+    this.dragNode();
+  }
+  createController() {
+    return circle({
+      cx: 25,
+      cy: 25,
+      r: 5,
+      fill: "turquoise",
+    });
+  }
+  resetNode(e) {
+    gsap.to(e.target, { duration: dur, x: 0, y: 0 });
+  }
+  dropNode(mergeNode, targetEl) {
+    let targetClass = $(targetEl).data("class");
+    $(mergeNode).addClass(targetClass.controllerId);
+    targetClass.drag();
+    this.fe.appendChild(
+      createSvgElement("feMergeNode", { in: targetClass.id })
+    );
+  }
+  dragNode() {
+    let thisClass = this;
+    let validHit = false;
+    Draggable.create(`.${this.controllerId}Node`, {
+      type: "x,y",
+      bounds: grid,
+      snap: {
+        x: function (endValue) {
+          return Math.round(endValue / gridWidth) * gridWidth;
+        },
+        y: function (endValue) {
+          return Math.round(endValue / gridHeight) * gridHeight;
+        },
+      },
+      onDragEnd: function (e) {
+        let previousControllers = thisClass.getPreviousControllers();
+        let i = previousControllers.length;
+        while (--i > -1) {
+          if (this.hitTest(previousControllers[i])) {
+            thisClass.dropNode(this.target, previousControllers[i]);
+            validHit = true;
+          }
+        }
+        if (!validHit) thisClass.resetNode(this);
+      },
+    });
+  }
+}
+//end of sub filters - light source elements and mergeNodes
 
 //TODO: determine best patern of inheritance for connector, connector2 and merge
+//FIXME: as a result of you not bothering to do the above you now have a shit tonne of repeated code
 class Connector extends Controller {
   constructor(id, index) {
     super(id, index);
@@ -1723,13 +1733,9 @@ class Connector extends Controller {
       this.resetConnector();
     });
   }
-
-  initController(group, xPos, yPos) {
-    $(group).data("class", this);
-    gsap.set(group, { x: gridWidth * xPos, y: gridHeight * yPos });
-    $("#connectorLayer")[0].appendChild(group);
+  toDOM() {
+    connectorLayer.appendChild(this.controller);
   }
-
   createController() {
     // move to init vars?
     this.maleClasses = this.controllerId + "Head male connector";
@@ -1747,7 +1753,6 @@ class Connector extends Controller {
         class: this.maleClasses,
         fill: "lightblue",
         d: $("#connectorMale").attr("d"),
-        transform: "translate(50)",
       })
     );
     wireLayer.appendChild(
@@ -1765,12 +1770,10 @@ class Connector extends Controller {
         class: this.femaleClasses,
         fill: "magenta",
         d: $("#connectorFemale").attr("d"),
-        transform: "translate(-50)",
       })
     );
     return g;
   }
-
   dragConnector() {
     let thisClass = this;
     Draggable.create("." + thisClass.controllerId + "Head", {
@@ -1822,6 +1825,9 @@ class Connector extends Controller {
         this.output = feClass;
       }
       $(connector).addClass(feClass.controllerId);
+      try {
+        feClass.wires.push(this);
+      } catch {}
       feClass.drag();
       // FIXME: this should maybe just update the relevant filter?
       updateAllFilters();
@@ -1831,11 +1837,18 @@ class Connector extends Controller {
 
   resetConnector() {
     let gChildren = this.controller.childNodes;
+    let thisClass = this;
     try {
       this.input.next = null;
     } catch {}
     try {
       this.output.prev = null;
+    } catch {}
+    try {
+      this.output.wires.splice(this.output.wires.indexOf(this), 1);
+    } catch {}
+    try {
+      this.input.wires.splice(this.input.wires.indexOf(this), 1);
     } catch {}
     $("#" + this.controllerId + "Female").attr("class", this.femaleClasses);
     $("#" + this.controllerId + "Male").attr("class", this.maleClasses);
@@ -1844,33 +1857,39 @@ class Connector extends Controller {
     this.output = null;
     //FIXME: this is probably not the right place for this function
     updateAllFilters();
-
-    setTimeout(function () {
-      gChildren.forEach((child) => {
-        gsap.to(child, {
-          duration: dur,
-          x: 0,
-          y: 0,
-          attr: { points: "25,25 25,25 25,25 25,25" },
-        });
+    setTimeout(() => {
+      let tlReset = gsap.timeline({
+        onComplete: () => {
+          thisClass.reDrawPolyline();
+        },
       });
+      tlReset.to(gChildren, { duration: dur, x: 0, y: 0 });
     }, timeout);
   }
 
   reDrawPolyline() {
     let female = document.getElementById(`${this.controllerId}Female`);
     let male = document.getElementById(`${this.controllerId}Male`);
-    let cxf = Math.trunc(getCenterX(female));
-    let cyf = Math.trunc(getCenterY(female));
-    let cxm = Math.trunc(getCenterX(male));
-    let cym = Math.trunc(getCenterY(male));
+    // FIXME: some repeated math here and repeated code
+    let cxf = Math.trunc(
+      gridWidth / 2 + gsap.getProperty(female, "x") + this.initX * gridWidth
+    );
+    let cyf = Math.trunc(
+      gridHeight / 2 + gsap.getProperty(female, "y") + this.initY * gridHeight
+    );
+    let cxm = Math.trunc(
+      gridWidth / 2 + gsap.getProperty(male, "x") + this.initX * gridWidth
+    );
+    let cym = Math.trunc(
+      gridHeight / 2 + gsap.getProperty(male, "y") + this.initY * gridHeight
+    );
     let x2 = (cxm + cxf) / 2;
     let points = `${cxf},${cyf} ${x2},${cyf} ${x2},${cym} ${cxm},${cym}`;
     gsap.to(`#${this.controllerId}Line`, { attr: { points: points } });
   }
 }
 
-class Connector2 extends Connector {
+class ConnectorTwo extends Connector {
   constructor(id, index) {
     super(id, index);
   }
@@ -1879,26 +1898,27 @@ class Connector2 extends Connector {
     this.femaleClasses = this.controllerId + "Head female connector";
     let g = group({ id: this.controllerId, class: this.controllerId });
     g.appendChild(
-      polyline({
-        points: "10,40 10,10 40,10",
+      path({
+        d:
+          "M10,40 L10,10 L40,10 M22,12 L12,22 M16,26 L26,16 M15,19 L19,23 M19,15 L23,19",
         fill: "pink",
         id: `${this.controllerId}Female`,
         class: this.femaleClasses,
       })
     );
-    //TODO: draw wire should be own function, its pretty much the same in the contreollers
     wireLayer.appendChild(
       polyline({
         id: this.controllerId + "Line",
         points: "25,25 25,25 25,25 25,25",
         strokeWidth: 5,
         stroke: "black",
-        class: "wire connector2",
+        class: "wire connectorTwo",
       })
     );
     g.appendChild(
-      polyline({
-        points: "10,40 40,10 40,40",
+      path({
+        d:
+          "M10,40 L40,10 L40,40 M28,38 L38,28 M34,24 L24,34 M35,31 L31,27 M31,35 L27,31",
         fill: "teal",
         id: `${this.controllerId}Male`,
         class: this.maleClasses,
@@ -1909,7 +1929,7 @@ class Connector2 extends Connector {
   connectFilterElement(connector, filterElement) {
     let feClass = $(filterElement).data("class");
     let female = $(connector).hasClass("female");
-    console.log(filterElement);
+
     if (female) this.input = feClass;
     else {
       if (
@@ -1917,22 +1937,34 @@ class Connector2 extends Connector {
         $(filterElement).hasClass("in2")
       ) {
         this.output = feClass;
-        console.log(this.output);
         gsap.set(this.output.fe, {
           attr: { in: feClass.prev.id, in2: this.input.id },
         });
       } else this.resetConnector();
     }
+    $(connector).addClass(feClass.controllerId);
+    feClass.drag();
+    try {
+      feClass.wires.push(this);
+    } catch {}
+    this.reDrawPolyline();
   }
 
   resetConnector() {
     let gChildren = this.controller.childNodes;
+    let thisClass = this;
     try {
       gsap.set(this.output.fe, {
         attr: {
           in2: this.output.prev ? `#${this.output.prev.id}Fe` : "SourceGraphic",
         },
       });
+    } catch {}
+    try {
+      this.output.wires.splice(this.output.wires.indexOf(this), 1);
+    } catch {}
+    try {
+      this.input.wires.splice(this.input.wires.indexOf(this), 1);
     } catch {}
     $("#" + this.controllerId + "Female").attr("class", this.femaleClasses);
     $("#" + this.controllerId + "Male").attr("class", this.maleClasses);
@@ -1941,16 +1973,13 @@ class Connector2 extends Connector {
     this.output = null;
     //FIXME: this is probably not the right place for this function
     updateAllFilters();
-
-    setTimeout(function () {
-      gChildren.forEach((child) => {
-        gsap.to(child, {
-          duration: dur,
-          x: 0,
-          y: 0,
-          attr: { points: "25,25 25,25 25,25 25,25" },
-        });
+    setTimeout(() => {
+      let tlReset = gsap.timeline({
+        onComplete: () => {
+          thisClass.reDrawPolyline();
+        },
       });
+      tlReset.to(gChildren, { duration: dur, x: 0, y: 0 });
     }, timeout);
   }
   // TODO: this function is similar to others. cycle though prev/next till element is found (returns false if hits null or hits the same element twice)
@@ -2000,6 +2029,9 @@ class FilterSocket extends Controller {
     filter.append(createSvgElement("feOffset"));
     return filter;
   }
+  toDOM() {
+    socketLayer.appendChild(this.controller);
+  }
   updateFilter() {
     this.filter.innerHTML = "<feOffset/>";
     let currentFilterElement = this;
@@ -2022,46 +2054,19 @@ class FilterSocket extends Controller {
 }
 //end of controllers
 
-initializeGrid = function () {
-  for (i = 0; i < gridRows * gridColumns; i++) {
-    y = Math.floor(i / gridColumns) * gridHeight;
-    x = (i * gridWidth) % (gridColumns * gridWidth);
-    row = Math.floor(i / gridColumns);
-    col = i % gridColumns;
-    $("#gridLayer")[0].appendChild(
-      rect({
-        x: x,
-        y: y,
-        fill: "gray",
-        opacity: 0.3,
-        width: gridWidth - 1,
-        height: gridHeight - 1,
-        class: `row${row} col${col} empty`,
-      })
-    );
-  }
-};
-initializeGrid();
-
-updateAllFilters = function () {
-  Array.from(document.getElementsByClassName("filterSocket")).forEach((s) => {
-    $(s).data("class").updateFilter();
-  });
-};
-
-let controllerArr = [
+const controllerArr = [
   {
     name: "Connector",
     constructor: Connector,
     counter: 0,
-    initX: 1,
+    initX: 0,
     initY: 0,
   },
   {
-    name: "Connector2",
-    constructor: Connector2,
+    name: "ConnectorTwo",
+    constructor: ConnectorTwo,
     counter: 0,
-    initX: 12,
+    initX: 2,
     initY: 0,
   },
   {
@@ -2148,25 +2153,95 @@ let controllerArr = [
     initX: 12,
     initY: 3,
   },
-  {
-    name: "FilterSocket",
-    constructor: FilterSocket,
-    counter: 1,
-    initX: 12,
-    initY: 1,
-  },
-  {
-    name: "FilterSocket",
-    constructor: FilterSocket,
-    counter: 2,
-    initX: 12,
-    initY: 5,
-  },
 ];
+
+initializeGrid = function () {
+  for (i = 0; i < gridRows * gridColumns; i++) {
+    y = Math.floor(i / gridColumns) * gridHeight;
+    x = (i * gridWidth) % (gridColumns * gridWidth);
+    row = Math.floor(i / gridColumns);
+    col = i % gridColumns;
+    $("#gridLayer")[0].appendChild(
+      rect({
+        x: x,
+        y: y,
+        fill: "gray",
+        opacity: 0.3,
+        width: gridWidth - 1,
+        height: gridHeight - 1,
+        class: `row${row} col${col} empty`,
+      })
+    );
+  }
+};
+
+importExternalSvg = function () {
+  const externalSVGs = [
+    {
+      container: "#controllerMorphologyContainer",
+      path: "/assets/controllers/controllerMorphology.svg",
+    },
+    {
+      container: "#controllerDisplacementMapContainer",
+      path: "/assets/controllers/controllerDisplacementMap.svg",
+    },
+    {
+      container: "#controllerTurbulenceContainer",
+      path: "/assets/controllers/controllerTurbulence.svg",
+    },
+    {
+      container: "#controllerSpecularLightingContainer",
+      path: "/assets/controllers/controllerSpecularLighting.svg",
+    },
+    {
+      container: "#controllerDiffuseLightingContainer",
+      path: "/assets/controllers/controllerDiffuseLighting.svg",
+    },
+    {
+      container: "#controllerColorMatrixContainer",
+      path: "/assets/controllers/controllerColorMatrix.svg",
+    },
+    {
+      container: "#controllerFloodContainer",
+      path: "/assets/controllers/controllerFlood.svg",
+    },
+    {
+      container: "#connectorContainer",
+      path: "/assets/controllers/connector.svg",
+    },
+    {
+      container: "#compositeOperatorContainer",
+      path: "/assets/controllers/compositeOperatorPaths.svg",
+    },
+    { container: "#bulbsContainer", path: "/assets/controllers/bulbs.svg" },
+    { container: "#canvasLayer", path: "/assets/skull.svg" },
+  ];
+  Promise.all(
+    externalSVGs.map((extSVG) => {
+      fetch(extSVG.path)
+        .then(function (response) {
+          return response.text();
+        })
+        .then(function (body) {
+          document.querySelector(extSVG.container).innerHTML = body;
+        });
+    })
+  )
+    //TODO: figure out why this doesnt wait until promise is finished
+    .then(function () {
+      tutorialPrompt();
+    });
+};
+
+updateAllFilters = function () {
+  Array.from(document.getElementsByClassName("filterSocket")).forEach((s) => {
+    $(s).data("class").updateFilter();
+  });
+};
 
 generateController = function (controllerKey) {
   let c = controllerArr[controllerKey];
-  let newFilterElement = new c.constructor(c.name + c.counter++, controllerKey);
+  return new c.constructor(c.name + c.counter++, controllerKey);
 };
 
 generateAllControllers = function () {
@@ -2175,68 +2250,460 @@ generateAllControllers = function () {
   );
 };
 
-generateNewControllerButtons = function () {
-  let buttonLayer = document.getElementById("newControllerButtonLayer");
-  controllerArr.forEach((c, index) => {
-    let newButton = group({
-      class: "newControllerButton",
-      id: `new${c.name}Button`,
-    });
-    newButton.appendChild(
-      circle({
-        r: 12,
-        cx: 25,
-        cy: 25,
-        fill: "white",
-      })
-    );
-    newButton.appendChild(
-      polyline({
-        points:
-          "23,23 23,15 27,15 27,23 35,23 35,27 27,27 27,35 23,35 23,27 15,27 15,23",
-      })
-    );
-    $(newButton).click(() => {
-      generateController(index);
-    });
-    buttonLayer.appendChild(newButton);
-    gsap.set(newButton, { x: c.initX * gridWidth, y: c.initY * gridHeight });
+generateNewControllerButton = function (index) {
+  let c = controllerArr[index];
+  let newButton = group({
+    class: "newControllerButton",
+    id: `new${c.name}Button`,
   });
+  newButton.appendChild(
+    circle({
+      r: 12,
+      cx: 25,
+      cy: 25,
+      fill: "white",
+    })
+  );
+  newButton.appendChild(
+    polyline({
+      points:
+        "23,23 23,15 27,15 27,23 35,23 35,27 27,27 27,35 23,35 23,27 15,27 15,23",
+    })
+  );
+  $(newButton).click(() => {
+    generateController(index);
+  });
+  buttonLayer.appendChild(newButton);
+  gsap.set(newButton, {
+    x: c.initX * gridWidth,
+    y: c.initY * gridHeight,
+    opacity: 0,
+  });
+  gsap.to(newButton, { duration: dur, opacity: 1 });
+  return newButton;
 };
-generateNewControllerButtons();
 
-postImportLoad = function () {
+generateAllNewControllerButtons = function () {
+  controllerArr.forEach((c, index) => generateNewControllerButton(index));
+};
+
+//TUTORIAL STUFF
+//FIXME: This is a really dumb way of making a tutorial
+// should maybe be {{stuff to do},{end conditions}},{{stuff to do}, {end conditions}} something like that?
+const Tutorial = {
+  filterSocket: null,
+  //FIXME: hardcoded value, should be aquired from filterSocket instead
+  filterString: "#filter0",
+  runTutorial: () => {
+    nextTutorialButton.onclick = Tutorial.tutLightElements;
+    Tutorial.filterSocket = generateController(19);
+    gsap.set(".tutorialButtons", { visibility: "visible" });
+    Tutorial.resetTutorial();
+    Tutorial.showDialog(
+      "This is an interactive demonstration of SVG filters. Take notice of the large skull in the center of the window and of the small square socket to the right of it. The filter will affect the skull, the socket will be use to input filter elements.",
+      () => {
+        let newBlurButton = generateNewControllerButton(3);
+        let blurCreatedEvent = newBlurButton.addEventListener(
+          "click",
+          Tutorial.tutBlurCreated
+        );
+        setTimeout(() => {
+          newBlurButton.removeEventListener("click", blurCreatedEvent);
+          Tutorial.showDialog(
+            "This new button on the left will create a 'Filter Element Controller'. Try giving it a click."
+          );
+        }, timeout);
+      }
+    );
+  },
+  tutBlurCreated: () => {
+    Tutorial.showDialog(
+      "This is a 'Filter Element Controller&trade;'. This particular one can apply a 'GaussianBlur' to the filter, but how do we get it to do that? with a connector.",
+      () => {
+        generateController(0);
+        Tutorial.tutConnectorCreated();
+      }
+    );
+  },
+  tutConnectorCreated: () => {
+    Tutorial.showDialog(
+      "Now you just need to click and drag the female (pink) end of the connector over top of the 'Filter Element Controller' (the thing that looks like an eyeball). After that, drag the male (blue and pointy) end of the 'Connector' over top of our 'Filter Socket'."
+    );
+    let filterCheckInterval = setInterval(() => {
+      if (Tutorial.filterSocket.prev) {
+        clearInterval(filterCheckInterval);
+        filterCheckInterval = setInterval(() => {
+          if (
+            document
+              .querySelector(`${Tutorial.filterString} feGaussianBlur`)
+              .getAttribute("stdDeviation") > 100
+          ) {
+            clearInterval(filterCheckInterval);
+            Tutorial.showDialog(
+              "Let's introduce a new 'Filter Element Controller'",
+              () => {
+                generateNewControllerButton(2);
+                generateController(2);
+                Tutorial.tutMorphologyCreated();
+              }
+            );
+          }
+        }, interval);
+        Tutorial.showDialog(
+          "Congratulations, you added a filter element to the filter. You may have noticed that the skull is now a little blurry. This is because of the filter element you just applied to it. Let's make it even blurier by dragging the pupil clockwise",
+          interval
+        );
+      }
+    }, interval);
+  },
+  tutMorphologyCreated: () => {
+    Tutorial.showDialog(
+      "This new controller can 'dilate' or 'erode' parts of an image, however, we cannot use it without a connector. Right now we only have one conncector and it is currently in use. To remove the connection, simply give the line drawn between the elements a click"
+    );
+    let filterCheckInterval = setInterval(() => {
+      if (!Tutorial.filterSocket.prev) {
+        clearInterval(filterCheckInterval);
+        Tutorial.showDialog(
+          "Now let's connect the female end to the 'Morphology Controller' and the male end to the 'Filter Socket'.",
+          () => {
+            filterCheckInterval = setInterval(() => {
+              if (
+                document.querySelector(`${Tutorial.filterString} feMorphology`)
+              ) {
+                clearInterval(filterCheckInterval);
+                Tutorial.showDialog(
+                  "Now that the 'Morphology Controller' is all hooked up you can increase or decrease its effect by dragging the little gray arrow, or switch between 'dialte' and 'erode' by simply clicking anywhere on the 'Morphology Controller'.",
+                  () => {
+                    setTimeout(() => {
+                      Tutorial.showDialog(
+                        "Now that you have a little experience with both filter elements, its time to combine them. In order to acheive this you will need a second connector. Click the newly created button to create a new connector",
+                        () => {
+                          let newConnectorButton = generateNewControllerButton(
+                            0
+                          );
+                          let newConnectorEvent = newConnectorButton.addEventListener(
+                            "click",
+                            () => {
+                              newConnectorButton.removeEventListener(
+                                "click",
+                                newConnectorEvent
+                              );
+                              Tutorial.tutSecondConnectorCreated();
+                            }
+                          );
+                        }
+                      );
+                    }, longTimeout);
+                  }
+                );
+              }
+            }, interval);
+          }
+        );
+      }
+    }, interval);
+  },
+  tutSecondConnectorCreated: () => {
+    Tutorial.showDialog(
+      "Without removing our existing connection, drag the female end of the new connector to our 'Gaussian Blur Controller'(eyeball) and the male end to our 'Morphology Controller'(x-shaped blob)."
+    );
+    let filterCheckInterval = setInterval(() => {
+      if (Tutorial.filterSocket.filter.childNodes.length > 2) {
+        clearInterval(filterCheckInterval);
+        Tutorial.showDialog(
+          "Great work. Play around with the controllers. When you are ready to carry on, press the 'Next Tutorial' button."
+        );
+      }
+    }, interval);
+  },
+  //Second phase of tutorial
+  tutLightElements: () => {
+    Tutorial.resetTutorial();
+    nextTutorialButton.onclick = Tutorial.tutStep3;
+    generateController(6);
+    generateController(7);
+    generateController(0);
+    Tutorial.showDialog(
+      "TUTORIAL 2: LIGHTS. These controllers are for 'Lighting Elements'. The one on the left controls 'Specular Lighting'; The one on the right controls 'Diffuse Lighting'. They cannot do much on thier own. Try connecting one to the filter socket",
+      () => {
+        let filterCheckInterval = setInterval(() => {
+          if (Tutorial.filterSocket.prev) {
+            clearInterval(filterCheckInterval);
+            Tutorial.showDialog(
+              "Oh No, Where did it go? 'Lighting Elements' need a light source to work",
+              () => {
+                generateController(16);
+                generateController(17);
+                generateController(18);
+                Tutorial.showDialog(
+                  "These are 'Light Source Elements' (hereforeto referedtoas:'LSE'). From left to right they are: 'Point Light', 'Distant Light', and 'Spot Light'. Drag one onto the 'Filter Element Controller' that you connected to the 'Filter Socket' previously.",
+                  () => {
+                    let filterCheckInterval = setInterval(() => {
+                      if (Tutorial.filterSocket.prev.lse) {
+                        clearInterval(filterCheckInterval);
+                        Tutorial.showDialog(
+                          "You can use the sliders on the 'Light Element Controller' to change it's attributes, you can also use the 'Light Element Controller' to change the color of the light source. If you would like to change the type of 'LSE' simply drag a different one over the 'Light Element Controller'. Take a few seconds to fuck around with the controls",
+                          () => {
+                            setTimeout(() => {
+                              Tutorial.showDialog(
+                                "This is showing the effect of the light on the image (refered to as the 'SourceGraphic' from here on out), but it no longer shows us the 'SourceGraphic' itself. One way to combine the 'SourceGraphic' with the 'Light Element' is to connect it to a 'Blend Controller'.",
+                                () => {
+                                  generateController(10);
+                                  Tutorial.tutBlendCreated();
+                                }
+                              );
+                            }, longTimeout * 2);
+                          }
+                        );
+                      }
+                    }, interval);
+                  }
+                );
+              }
+            );
+          }
+        }, interval);
+      }
+    );
+  },
+  tutBlendCreated: () => {
+    Tutorial.showDialog(
+      "This newest 'Filter Element Controller' is called the 'Blend Controller'. It works by combining two images, the method used to combine the two images can be changed by clicking the 'Blend Controller'.",
+      () => {
+        Tutorial.showDialog(
+          "In order to use it properly, the 'Blend Controller' Will need to come after(refered to as 'downstream') whatever you are blending. You will have to unplug the existing connection",
+          () => {
+            let filterCheckInterval = setInterval(() => {
+              if (!Tutorial.filterSocket.prev) {
+                clearInterval(filterCheckInterval);
+                generateNewControllerButton(0);
+                Tutorial.showDialog(
+                  "Connect the 'Lighting Element Controller' to the 'Blend Controller' and connect the 'Blend Controller' to the 'Filter Socket'.",
+                  () => {
+                    filterCheckInterval = setInterval(() => {
+                      // TODO: if filterElement order is inccorect tell the user to swap the connection order
+                      let filterChildren =
+                        Tutorial.filterSocket.filter.childNodes;
+                      if (
+                        filterChildren.length === 3 &&
+                        filterChildren[1].tagName == "feBlend"
+                      ) {
+                        clearInterval(filterCheckInterval);
+                        Tutorial.showDialog(
+                          "Click the 'Blend Controller' to change the blend mode",
+                          () => {
+                            //FIXME: having this as an arrayElement check is probably gonna cause exceptions
+                            let currentMode = filterChildren[1].getAttribute(
+                              "mode"
+                            );
+                            filterCheckInterval = setInterval(() => {
+                              if (
+                                filterChildren[1].getAttribute("mode") !==
+                                currentMode
+                              ) {
+                                clearInterval(filterCheckInterval);
+                                setTimeout(() => {
+                                  generateController(11),
+                                    Tutorial.tutCompositeCreated();
+                                }, longTimeout);
+                              }
+                            });
+                          },
+                          interval
+                        );
+                      }
+                    }, interval);
+                  }
+                );
+              }
+            }, interval);
+          }
+        );
+      }
+    );
+  },
+  tutCompositeCreated: () => {
+    Tutorial.showDialog(
+      "This new controller is the 'Composite Controller', it is functionally very similar to the 'Blend Controller'. Feel free to play with the lighting and when you are finished press the 'Next Tutorial' button"
+    );
+  },
+  //ThirdPhase of tutorial
+  tutStep3: () => {
+    Tutorial.resetTutorial();
+    nextTutorialButton.onclick = Tutorial.tutMerge;
+    generateController(5);
+    Tutorial.showDialog(
+      "TUTORIAL 3: This is the 'Turbulence Controller'. Hook it up, bro.",
+      () => {
+        generateNewControllerButton(0);
+        let filterCheckInterval = setInterval(() => {
+          if (Tutorial.filterSocket.prev) {
+            clearInterval(filterCheckInterval);
+            Tutorial.showDialog(
+              "This one just generates visual noise, and if used on its own it will completly eliminate our 'SourceGraphic' and/or anything else that was placed before it ('upstream') in the filter",
+              () => {
+                generateController(4);
+                Tutorial.showDialog(
+                  "When combined withe the newly created 'Displacement Map Controller' you can mutate the shape of the 'SourceGraphic' based on the output of the 'Turbulence Controller'. Make sure the turbulence filter is 'upstream' of the 'Displacement Map Controller'.",
+                  () => {
+                    // TODO: this needs inform the user if the filters are in the wrong order
+                    filterCheckInterval = setInterval(() => {
+                      let filterChildren =
+                        Tutorial.filterSocket.filter.childNodes;
+                      if (
+                        filterChildren.length === 3 &&
+                        filterChildren[1].tagName === "feDisplacementMap"
+                      ) {
+                        clearInterval(filterCheckInterval);
+                        generateController(15);
+                        Tutorial.showDialog(
+                          "This 'Image Controller' adds and image to the filter and it can be used in much the same way as the 'Turbulence Controller'. Remove the existing connections and plug the 'Image Controller' directly into the 'Filter Socket'.",
+                          () => {
+                            filterCheckInterval = setInterval(() => {
+                              if (Tutorial.filterSocket.prev instanceof Image) {
+                                clearInterval(filterCheckInterval);
+                                Tutorial.showDialog(
+                                  "Try to remember what the image looks like so you can see how it is affected by the 'Displacement Map'. Disconnect the 'Image Controller' and connect it to the 'Displacement Map', then connect to the 'Filter Socket'.",
+                                  () => {
+                                    filterCheckInterval = setInterval(() => {
+                                      filterChildren =
+                                        Tutorial.filterSocket.filter.childNodes;
+                                      console.log(filterChildren[1].tagName);
+                                      if (
+                                        filterChildren.length === 3 &&
+                                        filterChildren[1].tagName ===
+                                          "feDisplacementMap"
+                                      ) {
+                                        clearInterval(filterCheckInterval);
+                                        generateController(6);
+                                        generateController(7);
+                                        generateController(16);
+                                        generateController(17);
+                                        generateController(18);
+                                        Tutorial.tutLightBroughtBack();
+                                      }
+                                    }, interval);
+                                  }
+                                );
+                              }
+                            }, interval);
+                          }
+                        );
+                      }
+                    }, interval);
+                  }
+                );
+              }
+            );
+          }
+        }, interval);
+      }
+    );
+  },
+  tutLightBroughtBack: () => {
+    Tutorial.showDialog(
+      "Okay, now to bring back one of the 'Lighting Elements'. Disconnect the 'Displacement Map Controller' from the 'Filter Socket' and connect the 'Lighting Element' in between (make sure it has an 'LSE').",
+      () => {
+        filterCheckInterval = setInterval(() => {
+          filterChildren = Tutorial.filterSocket.filter.childNodes;
+          let len = filterChildren.length;
+          if (
+            filterChildren[len - 2].tagName === "feSpecularLighting" &&
+            Tutorial.filterSocket.prev.lse &&
+            filterChildren[len - 3].tagName === "feDisplacementMap" &&
+            (filterChildren[len - 4].tagName === "feTrubulence" ||
+              filterChildren[len - 4].tagName === "feImage")
+          ) {
+            clearInterval(filterCheckInterval);
+            Tutorial.showDialog(
+              "Great, now you can mess around with the dials and buttons for a moment, the next part will begin in a few seconds",
+              () => {
+                setTimeout(() => {
+                  let newConnectorTwoButton = generateNewControllerButton(1);
+                  Tutorial.showDialog(
+                    "Good job making it this far. Theres not much left of the tutorials but everything from here on out is a bit more complicated and there is alot of text to read; pay attention. This new button will create a second type of connector, 'Connector 2'",
+                    () => {
+                      let newButtonClick = newConnectorTwoButton.addEventListener(
+                        "click",
+                        () => {
+                          //FIXME: Why isnt this getting removed?
+                          newConnectorTwoButton.removeEventListener(
+                            "click",
+                            newButtonClick,
+                            false
+                          );
+                          Tutorial.showDialog(
+                            "'Connector 2' allows certain 'Filter Elements' to accept a second input.",
+                            () => {
+                              Tutorial.showDialog(
+                                "The female end of 'Connector 2' can be attached to any 'Filter Element Controller', however, the male end can only be attached to controllers that accept two inputs, these are: 'Blend', 'Composite', and 'Displacement Map'.",
+                                () => {
+                                  generateController(9);
+                                  generateController(10);
+                                  Tutorial.showDialog(
+                                    "One last thing to keep in mind is that the 'Filter Element Controller' that you plug the male end of 'ConnectorTwo' must already be downstream of whatever the female end is plugged into. Give it a try, click 'Next Tutorial' when you are finished."
+                                  );
+                                }
+                              );
+                            }
+                          );
+                        }
+                      );
+                    }
+                  );
+                }, longTimeout * 2);
+              }
+            );
+          }
+        }, interval);
+      }
+    );
+  },
+  //fourth phase of tutorial
+  tutMerge: () => {
+    nextTutorialButton.onclick = Tutorial.endTutorial;
+  },
+  endTutorial: () => {},
+  resetTutorial: () => {
+    clearInterval(1);
+    layersToReset.forEach((layer) => {
+      layer.innerHTML = "";
+    });
+    Tutorial.filterSocket.prev = null;
+    updateAllFilters();
+  },
+  showDialog: (text, closeFunction) => {
+    dialogText.innerHTML = text;
+    gsap.set(dialogBox, { visibility: "visible" });
+    gsap.to(dialogBox, { duration: dur, opacity: 1 });
+    dialogClose.onclick = () => {
+      Tutorial.hideDialog(closeFunction);
+    };
+  },
+  hideDialog: (callback) => {
+    let hide = gsap.timeline();
+    hide.to(dialogBox, { duration: dur, opacity: 0 });
+    hide.set(dialogBox, { visibility: "hidden" });
+    setTimeout(callback, timeout);
+  },
+};
+
+tutorialPrompt = function () {
+  let tutorial = confirm("Would you like to run the tutorial?");
+  tutorial
+    ? setTimeout(Tutorial.runTutorial, timeout)
+    : setTimeout(noTutorial, timeout);
+};
+
+noTutorial = function () {
+  generateAllNewControllerButtons();
   generateAllControllers();
 };
-//get the temp function calls out of here
-importExternalSvg = function () {
-  $("#controllerMorphologyContainer").load(
-    "/assets/controllers/controllerMorphology.svg"
-  );
-  $("#controllerDisplacementMapContainer").load(
-    "/assets/controllers/controllerDisplacementMap.svg"
-  );
-  $("#controllerTurbulenceContainer").load(
-    "/assets/controllers/controllerTurbulence.svg"
-  );
-  $("#controllerSpecularLightingContainer").load(
-    "/assets/controllers/controllerSpecularLighting.svg"
-  );
-  $("#controllerDiffuseLightingContainer").load(
-    "/assets/controllers/controllerDiffuseLighting.svg"
-  );
-  $("#controllerColorMatrixContainer").load(
-    "/assets/controllers/controllerColorMatrix.svg"
-  );
-  $("#controllerFloodContainer").load(
-    "/assets/controllers/controllerFlood.svg"
-  );
+//END OF TUTORIAL STUFF
 
-  $("#connectorContainer").load("/assets/controllers/connector.svg");
-  $("#compositeOperatorContainer").load(
-    "/assets/controllers/compositeOperatorPaths.svg"
-  );
-  $("#bulbsContainer").load("/assets/controllers/bulbs.svg");
-  $("#canvasLayer").load("/assets/skull.svg", postImportLoad);
+runFeDeadBoard = function () {
+  initializeGrid();
+  importExternalSvg();
 };
-importExternalSvg();
+
+runFeDeadBoard();

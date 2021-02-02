@@ -39,14 +39,18 @@
             </g>
         </defs>
         <g id="gridLayer"></g>
-        <g id="wireLayer"></g>
         <g id="canvasLayer"></g>
+        <g id="wireLayer"></g>
         <g id="newControllerButtonLayer"></g>
         <g id="connectorLayer"></g>
+        <g id="socketLayer"></g>
         <g id="filterControllerLayer"></g>
         <g id="lseLayer"></g>
     </svg>
-   
+    <button class="tutorialButtons" id="nextTutorialButton">
+        Next Tutorial
+    </button>
+   <div id="dialogBox"><span id="dialogText"></span><span id="dialogClose" onclick="Tutorial.hideDialog()">I got it</span></div>
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/gsap-shockingly-green/umd/gsap.js"></script>
     <script type="text/javascript" src="js/gsap-shockingly-green/umd/Draggable.js"></script>

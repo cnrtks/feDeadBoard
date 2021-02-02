@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+
+<svg id="connectorSvg" xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 50 50">
+   <path id="connectorMale" fill="skyblue" stroke="black" stroke-width="1"
+      d="M25,25 L40,25 L25,35 M20,15 L 35,25 L 20,35" />
+   <path id="connectorFemale" fill="pink" stroke="black" stroke-width="1" d="M 20 15 L 35 25 L 20 35
+      M 20 15 A 10 10 0 1 1 20 35
+      M35,25 h5 " />
+   <!-- <path id="connectorMale" fill="skyblue" stroke="black" stroke-width="1" transform="translate(-5)"
+      d="M25,25 L10,25 L25,35 M30,15 L 15,25 L 30,35" />
+   <path id="connectorFemale" fill="pink" stroke="black" stroke-width="1" transform="translate(5)" d="M 20 15 L 35 25 L 20 35
+      M 20 15 A 10 10 0 1 1 20 35
+      M35,25 h5 " /> -->
+</svg>

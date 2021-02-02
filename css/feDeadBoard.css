@@ -1,5 +1,7 @@
 html {
     background-color: black;
+    font-family     : Georgia, 'Times New Roman', Times, serif;
+    font-size       : 4vh;
 }
 
 body {
@@ -20,6 +22,37 @@ svg {
     overflow: visible;
 }
 
+#dialogBox {
+    position        : fixed;
+    width           : 75%;
+    height          : 75%;
+    left            : 12.5%;
+    top             : 12.5%;
+    background-color: rgba(138, 184, 236, 0.8);
+    border          : black 2px solid;
+    border-radius   : 15px;
+    opacity         : 0;
+    visibility      : hidden;
+    text-align      : center;
+}
+
+#dialogText {
+    position : absolute;
+    top      : 50%;
+    left     : 50%;
+    transform: translate(-50%, -50%);
+}
+
+#dialogClose {
+    position        : absolute;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius   : 5px;
+    bottom          : 0;
+    left            : 50%;
+    transform       : translate(-50%, -50%);
+    padding         : 1%;
+}
+
 #dial {
     fill: var(--blue-dark);
 }
@@ -32,11 +65,11 @@ svg {
     stroke-linecap  : round;
 }
 
-.wire.connector2{
-    stroke: pink;
+.wire.connectorTwo {
+    stroke: #ff7dbc;
 }
 
-.wire.merge{
+.wire.merge {
     stroke: green;
 }
 
@@ -45,8 +78,8 @@ svg {
 }
 
 #skull {
-    filter: url(#filter1);
-    fill  : teal;
+    /* filter: url(#filter1); */
+    fill: teal;
 }
 
 #svgSkull {
@@ -54,8 +87,8 @@ svg {
 }
 
 #jaw {
-    fill  : var(--R);
-    filter: url(#filter2);
+    fill     : var(--R);
+    /* filter: url(#filter2); */
 }
 
 #FilterSocket1Controller rect {
@@ -317,8 +350,8 @@ foreignObject {
 }
 
 .connector {
-    stroke          : black;
-    stroke-width    : 2;
+    stroke      : black;
+    stroke-width: 2;
 }
 
 .connector.male {
@@ -327,4 +360,17 @@ foreignObject {
 
 .connector.female {
     fill: thistle;
+}
+
+.tutorialButtons {
+    width     : 5%;
+    height    : 5%;
+    fill      : rgba(138, 184, 236, 0.8);
+    visibility: collapse;
+}
+
+#nextTutorialButton {
+    position: fixed;
+    right   : 5%;
+    bottom  : 0;
 }

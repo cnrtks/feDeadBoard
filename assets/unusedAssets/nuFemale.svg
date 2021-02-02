@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+              "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="0.555556in" height="0.555556in"
+     viewBox="0 0 50 50">
+  <path id="connectorFemale"
+        fill="none" stroke="black" stroke-width="1"
+        d="M 14.69,35.90
+           C 14.69,35.90 9.38,9.38 9.38,9.38
+             9.38,9.38 35.90,14.69 35.90,14.69M 14.69,35.90
+           C 8.83,30.04 8.83,20.55 14.69,14.69
+             20.55,8.83 30.04,8.83 35.90,14.69M 9.38,9.38
+           C 9.38,9.38 4.08,4.08 4.08,4.08" />
+</svg>
