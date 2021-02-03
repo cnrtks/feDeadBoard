@@ -310,7 +310,6 @@ class GaussianBlur extends FilterElement {
     g.appendChild(
       title(
         {},
-        {},
         "GaussianBlur: Drag the off-center lens to increase or decrease blurriness"
       )
     );
@@ -369,7 +368,6 @@ class DisplacementMap extends FilterElement {
     let thisClass = this;
     g.appendChild(
       title(
-        {},
         {},
         "DisplacementMap: Displaces a shape based on the colors plugged into it; press the buttons to change which color value used"
       )
@@ -1387,7 +1385,12 @@ class Merge extends FilterElement {
   }
   createController() {
     let g = group({ id: this.controllerId, class: this.controllerId });
-    g.appendChild(title({},"This is a Merge controller. It allows filters to be applied in tandem rather than in sequence. Click the center to generate a node and attach the node to any filter element upstream from the 'Merge Controller'."))
+    g.appendChild(
+      title(
+        {},
+        "This is a Merge controller. It allows filters to be applied in tandem rather than in sequence. Click the center to generate a node and attach the node to any filter element upstream from the 'Merge Controller'."
+      )
+    );
     g.appendChild(
       path({
         d: $("#mergeMain").attr("d"),
@@ -1728,8 +1731,8 @@ class MergeNode extends Controller {
     tlReset.to(this.controller, {
       duration: dur,
       x:
-      this.initX * gridHeight + gsap.getProperty(this.parent.controller, "x"),
-      y: this.initY * gridWidth + gsap.getProperty(this.parent.controller, "y") ,
+        this.initX * gridHeight + gsap.getProperty(this.parent.controller, "x"),
+      y: this.initY * gridWidth + gsap.getProperty(this.parent.controller, "y"),
       opacity: 1,
     });
     this.dragNode();
@@ -2376,7 +2379,7 @@ const Tutorial = {
     gsap.set(".tutorialButtons", { visibility: "visible" });
     Tutorial.resetTutorial();
     Tutorial.showDialog(
-      "This is an interactive demonstration of SVG filters. Take notice of the large skull in the center of the window and of the small square socket to the right of it. The filter will affect the skull, the socket will be used to input filter elements.",
+      "This is an interactive demonstration of SVG filters. Take notice of the large skull in the center of the window and of the small square socket to the right of it. The filter will affect the skull; The socket will be used to input filter elements.",
       () => {
         let newBlurButton = generateNewControllerButton(3);
         let blurCreatedEvent = newBlurButton.addEventListener(
@@ -2620,7 +2623,7 @@ const Tutorial = {
               () => {
                 generateController(4);
                 Tutorial.showDialog(
-                  "When combined withe the newly created 'Displacement Map Controller' you can mutate the shape of the 'SourceGraphic' based on the output of the 'Turbulence Controller'. Make sure the turbulence filter is 'upstream' of the 'Displacement Map Controller'.",
+                  "When combined with the newly created 'Displacement Map Controller' you can mutate the shape of the 'SourceGraphic' based on the output of the 'Turbulence Controller'. Make sure the turbulence filter is 'upstream' of the 'Displacement Map Controller'.",
                   () => {
                     // TODO: this needs inform the user if the filters are in the wrong order
                     filterCheckInterval = setInterval(() => {
@@ -2736,11 +2739,15 @@ const Tutorial = {
   },
   //fourth phase of tutorial
   tutMerge: () => {
-    Tutorial.showDialog("Congratualtions on completing the tutorial, there are a few more filter elements to play around with and much to learn that was not covered in the tutorial")
+    Tutorial.showDialog(
+      "Congratualtions on completing the tutorial, there are a few more filter elements to play around with and much to learn that was not covered in the tutorial",
+      Tutorial.endTutorial
+    );
     nextTutorialButton.onclick = Tutorial.endTutorial;
   },
   endTutorial: () => {
     Tutorial.resetTutorial();
+    gsap.to(".tutorialButtons", {duration: dur, opacity: 0, visbility: "collapse"})
     noTutorial();
   },
   resetTutorial: () => {
@@ -2765,10 +2772,10 @@ const Tutorial = {
     hide.set(dialogBox, { visibility: "hidden" });
     setTimeout(callback, timeout);
   },
-  showLastPrompt: ()=>{
+  showLastPrompt: () => {
     gsap.set(dialogBox, { visibility: "visible" });
     gsap.to(dialogBox, { duration: dur, opacity: 1 });
-  }
+  },
 };
 
 tutorialPrompt = function () {
